@@ -13,6 +13,19 @@ An **Ingress Controller** is the software that actually implements these routing
 
 **Ingress rules** define how traffic is routed. Host-based routing sends traffic based on the `Host` header: `foo.example.com` goes to Service A, `bar.example.com` to Service B. Path-based routing uses the URL path: `/api` might route to Service B, `/web` to Service C. You can combine both: `api.example.com/users` and `api.example.com/products` could route to different Services on the same host.
 
+```mermaid
+graph TD
+  Client[Client Browser] -->|demo.com/app1| IC[Ingress Controller]
+  Client -->|demo.com/app2| IC
+  Client -->|api.demo.com| IC
+  IC -->|/app1| SVC1[Service: app1]
+  IC -->|/app2| SVC2[Service: app2]
+  IC -->|api.demo.com| SVC3[Service: api]
+  SVC1 --> P1[Pod]
+  SVC2 --> P2[Pod]
+  SVC3 --> P3[Pod]
+```
+
 **TLS termination** means the Ingress Controller handles HTTPS decryption. Clients connect over HTTPS; the controller terminates TLS using a certificate and forwards plain HTTP to the backend Services. You store the certificate and private key in a Kubernetes Secret of type `kubernetes.io/tls` and reference it in the Ingress spec.
 
 **IngressClass** is a resource that specifies which Ingress Controller handles which Ingress objects. When you have multiple controllers (e.g., NGINX and Traefik), you use `ingressClassName` in your Ingress to bind it to the correct one. Most clusters have a default IngressClass named `nginx`.
@@ -21,7 +34,31 @@ An **Ingress Controller** is the software that actually implements these routing
 
 A NetworkPolicy has a **podSelector** that defines which Pods the policy applies to. An empty selector `{}` means all Pods in the namespace. The policy then defines **ingress rules** (who can send traffic to those Pods) and **egress rules** (where those Pods can send traffic). Rules use label selectors to specify allowed peers.
 
+```mermaid
+graph TD
+  subgraph Namespace
+    FE[Frontend Pod<br/>role=frontend] -->|Allowed| API[API Pod<br/>role=api]
+    API -->|Allowed| DB[Database Pod<br/>role=db]
+    FE -.->|Blocked| DB
+  end
+  External[External Traffic] -.->|Blocked by default deny| FE
+  style DB fill:#FFCDD2
+```
+
 **Default deny** is a common pattern: create a NetworkPolicy with `podSelector: {}` and `policyTypes: [Ingress, Egress]` but no rules. This blocks all traffic. You then add allow policies for specific traffic. Note: NetworkPolicies are additive. If no policy selects a Pod, all traffic is allowed. Once a policy selects a Pod, only explicitly allowed traffic is permitted.
+
+```mermaid
+graph LR
+  subgraph Before["Before Policy"]
+    A1[Pod A] -->|open| B1[Pod B]
+    C1[Pod C] -->|open| B1
+  end
+  subgraph After["After Default Deny"]
+    A2[Pod A] -.->|blocked| B2[Pod B]
+    C2[Pod C] -.->|blocked| B2
+  end
+  style B2 fill:#FFCDD2
+```
 
 A critical caveat: **NetworkPolicies only work if your cluster has a CNI (Container Network Interface) plugin that supports them.** Calico and Cilium support NetworkPolicy. The default CNI in kind is kindnet, which does not support NetworkPolicy. For testing, you must install Calico or another compatible CNI.
 
@@ -95,6 +132,17 @@ Apply:
 
 ```bash
 kubectl apply -f ingress.yaml
+```
+
+```mermaid
+graph TB
+  User[User Request] --> IC[NGINX Ingress Controller]
+  IC -->|reads rules from| ING[Ingress Resource]
+  ING -->|path: /app1| SVC1[Service app1 :80]
+  ING -->|path: /app2| SVC2[Service app2 :80]
+  SVC1 --> P1[Pod]
+  SVC1 --> P2[Pod]
+  SVC2 --> P3[Pod]
 ```
 
 ### 5. Test the Ingress

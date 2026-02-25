@@ -15,11 +15,46 @@ The CKAD exam is a performance-based certification that tests your ability to wo
 
 **Time management:** With roughly 6 minutes per question on average, you must work efficiently. The most important strategy is "flag and move on": never spend more than 8 minutes on any single question. If you are stuck, flag it, move to the next, and return later if time permits.
 
+```mermaid
+flowchart TD
+  Read[Read Question] --> Assess{Confident?}
+  Assess -->|Yes| Solve[Solve Immediately]
+  Assess -->|Unsure| Flag[Flag + Skip]
+  Solve --> Verify[Verify with kubectl get]
+  Verify --> Next[Next Question]
+  Flag --> Next
+  Next --> More{More questions?}
+  More -->|Yes| Read
+  More -->|No| Review[Return to Flagged]
+  Review --> Solve2[Attempt Flagged]
+  Solve2 --> Done[Submit]
+```
+
 **Context switching:** The exam provides multiple clusters. You must switch between them using `kubectl config use-context <context-name>`. Always verify you are in the correct context before answering; answering in the wrong cluster costs you points.
 
 **The imperative-then-edit workflow:** Writing YAML from scratch is slow. Use this workflow instead: (1) Generate YAML with `kubectl run`, `kubectl create deployment`, or similar commands using `--dry-run=client -o yaml > file.yaml`; (2) Edit the file with vim to add probes, volumes, or other fields; (3) Apply with `kubectl apply -f file.yaml`. This is the most powerful technique for the exam.
 
+```mermaid
+graph LR
+  Imp["kubectl create/run<br/>--dry-run=client -o yaml"] -->|generates| YAML[YAML file]
+  YAML -->|vim edit| Edited[Add probes, volumes, etc.]
+  Edited -->|kubectl apply -f| Live[Resource in Cluster]
+  Live -->|kubectl get/describe| Verify[Verify]
+```
+
 **Vim survival guide:** You need basic vim to edit YAML. Navigation: h (left), j (down), k (up), l (right). Press `i` to enter insert mode, `Esc` to exit. Save and quit: `:wq`. Search: `/pattern` then `n` for next. Replace: `:%s/old/new/g`. Undo: `u`. Copy line: `yy`. Paste: `p`. Delete line: `dd`.
+
+```mermaid
+graph TD
+  Normal[Normal Mode] -->|i| Insert[Insert Mode]
+  Insert -->|Esc| Normal
+  Normal -->|/pattern| Search[Search Mode]
+  Normal -->|:wq| Save[Save and Quit]
+  Normal -->|:q!| Quit[Quit without saving]
+  Normal -->|dd| Del[Delete line]
+  Normal -->|yy + p| Copy[Copy + Paste line]
+  Normal -->|u| Undo[Undo]
+```
 
 **Bookmarks:** Have the kubectl cheat sheet and the API reference bookmarked in kubernetes.io/docs for quick lookups.
 

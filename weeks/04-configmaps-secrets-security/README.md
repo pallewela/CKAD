@@ -15,11 +15,46 @@ Before diving into commands, you need a clear mental model of how configuration 
 
 **Two ways to inject config into a container** — You can expose ConfigMaps and Secrets to your application in two ways. First, as environment variables: the key becomes the variable name, the value becomes the variable value. The app reads them via `process.env` or `os.environ`. Environment variables are set once when the container starts and do not change if the ConfigMap or Secret is updated later. Second, as volume mounts: Kubernetes creates a directory and populates it with files, one file per key. The filename is the key; the file content is the value. Volume-mounted files are updated periodically (typically within a minute) when the ConfigMap or Secret changes, so your app can pick up new config without a restart. Use env vars when you need a small set of values and the app does not support file-based config. Use volume mounts when you have many keys, large config files, or need hot-reload behavior.
 
+```mermaid
+graph TB
+  CM[ConfigMap] -->|envFrom / valueFrom| ENV[Environment Variables]
+  CM -->|volumeMount| Files[Files in Container]
+  SEC[Secret] -->|envFrom / valueFrom| ENV
+  SEC -->|volumeMount| SecFiles[Files in Container]
+  ENV --> Container[Container]
+  Files --> Container
+  SecFiles --> Container
+```
+
 **SecurityContext** — A SecurityContext controls security settings for a Pod or container. Key fields: `runAsUser` (run the process as a specific user ID instead of root), `runAsNonRoot` (reject if the image runs as root), `readOnlyRootFilesystem` (make the root filesystem read-only so the container cannot write outside designated paths), and `capabilities` (add or drop Linux capabilities such as `NET_BIND_SERVICE` or `CAP_SYS_ADMIN`). SecurityContext can be set at the Pod level (applies to all containers) or at the container level (overrides Pod-level for that container). Capabilities are container-level only.
+
+```mermaid
+graph TD
+  PS[Pod-Level SecurityContext] --> RunAs[runAsUser: 1000]
+  PS --> RunGroup[runAsGroup: 3000]
+  PS --> FSG[fsGroup: 2000]
+  CS[Container-Level SecurityContext] --> RO[readOnlyRootFilesystem]
+  CS --> Cap[capabilities: drop ALL]
+  CS --> Priv[allowPrivilegeEscalation: false]
+  PS -->|applies to all containers| CS
+  style PS fill:#bbdefb
+  style CS fill:#c8e6c9
+```
 
 **ServiceAccount** — A ServiceAccount is an identity for Pods to authenticate with the Kubernetes API. Every Pod gets a default ServiceAccount (`default`) in its namespace. When a Pod makes API calls (e.g., listing other Pods), it uses the credentials of its ServiceAccount. You create custom ServiceAccounts and bind them to Roles or ClusterRoles via RoleBindings to grant specific permissions. A Pod with a custom ServiceAccount can only perform the actions its Role allows.
 
 **Resource management** — Kubernetes lets you specify how much CPU and memory a container needs. A **request** is the minimum guaranteed amount: the scheduler uses it to place the Pod on a node with enough capacity. A **limit** is the maximum allowed: the container is throttled (CPU) or killed (memory) if it exceeds the limit. **LimitRange** defines per-Pod or per-container defaults and min/max bounds within a namespace (e.g., "every container must have a CPU limit between 100m and 2"). **ResourceQuota** sets per-namespace totals (e.g., "this namespace may have at most 10 Pods, 4 CPU, and 8Gi memory"). Quotas require Pods to have resource requests (and often limits) set; otherwise, the quota controller cannot track usage and Pod creation may fail.
+
+```mermaid
+graph LR
+  subgraph Namespace
+    LR[LimitRange<br/>Per-Pod defaults] --> Pod1[Pod A]
+    LR --> Pod2[Pod B]
+    RQ[ResourceQuota<br/>Namespace total cap] -.->|enforces| LR
+  end
+  Pod1 --> Req1[requests: 100m CPU, 128Mi]
+  Pod1 --> Lim1[limits: 200m CPU, 256Mi]
+```
 
 ---
 
@@ -173,6 +208,16 @@ kubectl create configmap app-config --from-literal=APP_COLOR=green --from-litera
 
 - **Volume-mounted files**: Wait up to a minute, then `kubectl exec app-volume-pod -- cat /etc/config/APP_COLOR` — you should see `green`. Volume mounts update automatically.
 - **Environment variables**: `kubectl exec app-env-pod -- env | grep APP_COLOR` — you will still see `blue`. Env vars do NOT update; the Pod must be restarted.
+
+```mermaid
+graph TD
+  Update[ConfigMap Updated] --> Vol[Volume Mount]
+  Update --> Env[Environment Variable]
+  Vol -->|Auto-updates files| OK[New value visible]
+  Env -->|Requires Pod restart| Stale[Old value until restart]
+  style OK fill:#90EE90
+  style Stale fill:#FFCDD2
+```
 
 ### 6. Create a Secret
 

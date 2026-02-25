@@ -11,6 +11,28 @@ Before diving into commands, you need a clear mental model of what containers ar
 
 **What is a container?** A container is a lightweight, isolated environment that runs a single process (or a small group of related processes). Think of it like a shipping container: it holds everything your application needs to run—code, dependencies, and configuration—in a standardized box. The key word is *isolated*: each container has its own filesystem, network, and process space, but unlike a virtual machine, it does *not* include a full copy of an operating system. Containers share the host kernel (the core of the operating system) with the host machine and with other containers. This makes them much smaller and faster to start than virtual machines. A VM might take minutes to boot; a container starts in seconds.
 
+```mermaid
+graph LR
+  subgraph VM["Virtual Machine"]
+    direction TB
+    App1[App] --> Bins1[Bins/Libs]
+    Bins1 --> GuestOS1[Guest OS]
+    App2[App] --> Bins2[Bins/Libs]
+    Bins2 --> GuestOS2[Guest OS]
+    GuestOS1 --> HV[Hypervisor]
+    GuestOS2 --> HV
+  end
+  subgraph Container["Containers"]
+    direction TB
+    CApp1[App] --> CBins1[Bins/Libs]
+    CApp2[App] --> CBins2[Bins/Libs]
+    CBins1 --> Runtime[Container Runtime]
+    CBins2 --> Runtime
+  end
+  HV --> HostOS1[Host OS + Kernel]
+  Runtime --> HostOS2[Host OS + Kernel]
+```
+
 **What is a Docker image?** An image is a read-only template that defines exactly what goes inside a container. It is built in layers, like a stack of transparencies. Each layer adds or changes files. Images follow the OCI (Open Container Initiative) format, which is an industry standard—so an image built with Docker can run on Podman, containerd, or Kubernetes without changes. When you run a container, Docker creates a thin writable layer on top of the image; that layer is discarded when the container stops unless you explicitly save it.
 
 **What is a Dockerfile?** A Dockerfile is a text file that contains instructions for building an image. You write it; Docker reads it and executes each instruction to produce layers. The main instructions you will use:
@@ -24,9 +46,32 @@ Before diving into commands, you need a clear mental model of what containers ar
 
 **Image layers and caching** — Each instruction in a Dockerfile creates a layer. Docker caches layers: if an instruction and everything before it are unchanged, Docker reuses the cached layer. If you change one line, every layer after it is rebuilt. That is why order matters: put rarely changing instructions (like copying `go.mod` and `go.sum`) first, and frequently changing instructions (like copying source code) last. Copying dependencies before source code means dependency layers are cached even when you edit your Go files.
 
+```mermaid
+graph TB
+  L1["Layer 1: FROM golang:alpine"] --> L2["Layer 2: COPY go.mod"]
+  L2 --> L3["Layer 3: RUN go mod download"]
+  L3 --> L4["Layer 4: COPY . ."]
+  L4 --> L5["Layer 5: RUN go build"]
+  L5 --> W["Writable Container Layer"]
+  style W fill:#f9f,stroke:#333
+```
+
 **Container registries** — A registry is a storage and distribution service for images. Docker Hub is the default public registry (like GitHub for images). GitHub Container Registry (GHCR) is another option, often used for images built from GitHub repos. You push images with `docker push` and pull them with `docker pull`.
 
 **Multi-stage builds** — A Dockerfile can have multiple `FROM` instructions. Each `FROM` starts a new stage. You can copy artifacts from one stage to another. For Go, this is crucial: you build in a stage that has the Go compiler (a large image, often 800MB+), then copy only the compiled binary into a minimal stage (e.g., `scratch` or `alpine`). The final image can be under 15MB because it contains no compiler, no source code, and no build tools—just the binary.
+
+```mermaid
+graph LR
+  subgraph Stage1["Stage 1: Builder ~800MB"]
+    Src[Source Code] --> Compile[go build]
+    Compile --> Binary[Binary ~10MB]
+  end
+  subgraph Stage2["Stage 2: Final ~12MB"]
+    Binary -->|COPY --from=builder| Scratch[scratch image]
+    Scratch --> Final[Final Image]
+  end
+  style Final fill:#90EE90,stroke:#333
+```
 
 ---
 
@@ -184,6 +229,15 @@ docker images myapp:multi
 ```
 
 The multi-stage image should be around 10–15MB.
+
+```mermaid
+graph LR
+  Write[Write Dockerfile] --> Build["docker build -t myapp:v1 ."]
+  Build --> Test["docker run -p 8080:8080 myapp:v1"]
+  Test --> Tag["docker tag myapp:v1 user/myapp:v1"]
+  Tag --> Push["docker push user/myapp:v1"]
+  Push --> Registry[(Docker Hub / GHCR)]
+```
 
 ### 8. Tag and push to Docker Hub
 

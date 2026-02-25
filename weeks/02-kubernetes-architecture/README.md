@@ -31,7 +31,46 @@ The **Control Plane** runs the cluster. It has four core components:
 
 - **Container runtime**: The software that actually runs containers (e.g., containerd, CRI-O). Kubernetes does not run containers directly; it delegates to a runtime.
 
+```mermaid
+graph TB
+  subgraph CP["Control Plane"]
+    API[API Server] --- ETCD[(etcd)]
+    API --- SCHED[Scheduler]
+    API --- CM[Controller Manager]
+  end
+  subgraph W1["Worker Node 1"]
+    KL1[kubelet] --- KP1[kube-proxy]
+    KL1 --- CR1[Container Runtime]
+    CR1 --- P1[Pod A]
+    CR1 --- P2[Pod B]
+  end
+  subgraph W2["Worker Node 2"]
+    KL2[kubelet] --- KP2[kube-proxy]
+    KL2 --- CR2[Container Runtime]
+    CR2 --- P3[Pod C]
+  end
+  API -->|instructions| KL1
+  API -->|instructions| KL2
+```
+
 Kubernetes uses a **declarative model**. You describe *what* you want (desired state), and Kubernetes figures out *how* to achieve it. You say "I want a Pod running nginx." Kubernetes creates it, monitors it, and restarts it if it crashes. You do not write scripts to start processes; you declare intent.
+
+```mermaid
+sequenceDiagram
+  participant User as You (kubectl)
+  participant API as API Server
+  participant ETCD as etcd
+  participant Sched as Scheduler
+  participant KL as kubelet
+  User->>API: kubectl apply -f pod.yaml
+  API->>ETCD: Store Pod spec
+  API->>Sched: New Pod needs scheduling
+  Sched->>API: Assign Pod to Node 1
+  API->>ETCD: Update Pod binding
+  API->>KL: Run this Pod
+  KL->>KL: Start container(s)
+  KL->>API: Pod is Running
+```
 
 A **Pod** is the smallest deployable unit in Kubernetes. It wraps one or more containers that share the same network and storage. Containers in a Pod run on the same node and can talk to each other via localhost. Most Pods have a single container; multi-container Pods are used for tightly coupled helpers (e.g., a main app and a log shipper).
 
@@ -45,6 +84,20 @@ When you define resources, you use **YAML** (or JSON). Every Kubernetes resource
 - **spec**: The desired configuration. For a Pod, this includes which containers to run, their images, ports, and more.
 
 YAML is whitespace-sensitive: use spaces, never tabs. Indentation defines structure.
+
+```mermaid
+graph TD
+  YAML[Kubernetes YAML] --> AV[apiVersion: v1]
+  YAML --> K[kind: Pod]
+  YAML --> MD[metadata]
+  YAML --> SP[spec]
+  MD --> Name[name: my-pod]
+  MD --> NS[namespace: default]
+  MD --> Labels[labels]
+  SP --> Containers[containers]
+  Containers --> Img[image: nginx]
+  Containers --> Ports[ports]
+```
 
 ---
 
@@ -95,6 +148,17 @@ Follow these steps to build hands-on familiarity with the cluster and core resou
          ports:
            - containerPort: 80
    ```
+
+```mermaid
+graph TB
+  Cluster[Cluster] --> NS1[default namespace]
+  Cluster --> NS2[dev namespace]
+  Cluster --> NS3[kube-system namespace]
+  NS1 --> Pod1[my-first-pod]
+  NS2 --> Pod2[nginx]
+  NS3 --> DNS[CoreDNS]
+  NS3 --> Proxy[kube-proxy]
+```
 
 5. **Apply it with `kubectl apply -f pod.yaml`.**
    ```bash

@@ -19,13 +19,49 @@ LoadBalancer provisions an external load balancer when running on a cloud provid
 
 ExternalName maps the Service to an external DNS name via a CNAME record. Use it when you want Pods to reach an external service (e.g., a database hosted outside the cluster) using a Kubernetes DNS name instead of hard-coding the external hostname.
 
+```mermaid
+graph TB
+  Internet[Internet] -->|External traffic| LB[LoadBalancer]
+  LB --> NP
+  Internet -->|NodeIP:30080| NP[NodePort :30080]
+  NP --> CIP[ClusterIP :80]
+  CIP --> EP[Endpoints]
+  EP --> Pod1[Pod 10.0.1.5]
+  EP --> Pod2[Pod 10.0.1.6]
+  EP --> Pod3[Pod 10.0.1.7]
+```
+
 Services find Pods using label selectors. The Service spec includes a selector such as `app: nginx`. The Service controller continuously watches for Pods whose labels match that selector. Only matching Pods receive traffic. If no Pods match, the Service has no endpoints and traffic goes nowhere. This is the most common cause of "Service not working": the selector does not match the Pod labels.
+
+```mermaid
+graph LR
+  SVC["Service<br/>selector: app=web"] -->|matches| Pod1["Pod<br/>labels: app=web"]
+  SVC -->|matches| Pod2["Pod<br/>labels: app=web"]
+  SVC -.->|no match| Pod3["Pod<br/>labels: app=api"]
+  style Pod3 fill:#FFCDD2
+```
 
 Endpoints are the list of Pod IPs and ports that a Service routes to. Kubernetes creates an Endpoints object automatically for every Service that has a selector. The Endpoints object is updated in real time as matching Pods come and go. When you run `kubectl get endpoints`, you see the actual Pod IPs. If the list is empty, no Pods match the Service selector.
 
 Kubernetes runs an internal DNS server. Every Service gets a DNS entry: `<service-name>.<namespace>.svc.cluster.local`. From a Pod in the same namespace, you can use just `<service-name>`. From another namespace, use the full name. The cluster domain suffix is `cluster.local` by default.
 
+```mermaid
+graph LR
+  PodA[Pod A<br/>namespace: default] -->|my-svc| DNS[CoreDNS]
+  DNS -->|resolves| Full["my-svc.default.svc.cluster.local"]
+  Full --> SVC[Service ClusterIP]
+  SVC --> Target[Target Pod]
+  PodB[Pod B<br/>namespace: other] -->|my-svc.default| DNS
+```
+
 Port terminology matters. The Service has a `port` (the port clients connect to on the Service) and a `targetPort` (the port on the container that receives traffic). They can differ: for example, Service port 80, targetPort 8080. For NodePort and LoadBalancer, `nodePort` is the port on the node (30000–32767).
+
+```mermaid
+graph LR
+  Client[Client] -->|nodePort: 30080| Node[Node]
+  Node -->|port: 80| SVC[Service]
+  SVC -->|targetPort: 8080| Container[Container :8080]
+```
 
 A Headless Service is created by setting `clusterIP: None`. It has no virtual IP. DNS for a headless Service returns the individual Pod IPs (A records) instead of a single Service IP. Use headless Services for StatefulSets when clients need to reach specific Pods directly, or for service discovery patterns that require direct Pod addressing.
 

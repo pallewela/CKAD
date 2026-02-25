@@ -25,6 +25,20 @@ Kubernetes uses probes to determine container health. Each probe type answers a 
 
 **Startup Probe** — "Has the container finished starting?" The startup probe disables liveness and readiness checks until it succeeds for the first time. Use it for slow-starting legacy applications: a Java app that takes 60 seconds to initialize, a database that needs time to recover. Without a startup probe, the liveness probe would fire during startup, fail (because the app is not ready yet), and restart the container repeatedly. The startup probe gives the container a grace period. Once it succeeds, liveness and readiness take over. You can set a high failureThreshold so that `failureThreshold * periodSeconds` equals your expected startup time (e.g., 30 failures at 10 seconds = 300 seconds of startup time).
 
+```mermaid
+graph TD
+  Probes[Kubernetes Probes] --> LP[Liveness Probe]
+  Probes --> RP[Readiness Probe]
+  Probes --> SP[Startup Probe]
+  LP -->|Fails| Restart[Container Restarted]
+  RP -->|Fails| Remove[Removed from Endpoints]
+  SP -->|Fails| Wait[Keep waiting]
+  SP -->|Succeeds| Enable[Enable Liveness + Readiness]
+  style Restart fill:#FFCDD2
+  style Remove fill:#FFE0B2
+  style Wait fill:#E1BEE7
+```
+
 ---
 
 ### Probe Mechanisms
@@ -38,6 +52,23 @@ Probes can check health in four ways:
 **exec** — Runs a command inside the container. The probe succeeds if the command exits with code 0. Non-zero exit means unhealthy. Use it when HTTP or TCP checks are not suitable. Example: `command: ["cat", "/tmp/healthy"]`.
 
 **grpc** — Sends a gRPC health check. Available in Kubernetes 1.24+. Use it for gRPC services.
+
+```mermaid
+flowchart TD
+  Start[Container Starts] --> SPCheck{Startup Probe<br/>configured?}
+  SPCheck -->|Yes| SPRun[Run Startup Probe]
+  SPCheck -->|No| LPCheck
+  SPRun -->|Pass| LPCheck[Run Liveness Probe]
+  SPRun -->|Fail x threshold| Kill[Kill + Restart Container]
+  LPCheck -->|Pass| RPCheck[Run Readiness Probe]
+  LPCheck -->|Fail x threshold| Kill
+  RPCheck -->|Pass| Ready[Pod in Service Endpoints]
+  RPCheck -->|Fail| NotReady[Pod removed from Endpoints]
+  NotReady -->|Probe passes again| Ready
+  style Ready fill:#90EE90
+  style Kill fill:#FFCDD2
+  style NotReady fill:#FFE0B2
+```
 
 ---
 
@@ -83,6 +114,21 @@ Probes can check health in four ways:
 
 5. **`kubectl exec -it <pod> -- /bin/sh`** — Get a shell inside the container. Test connectivity with wget or curl, check files, verify config. Use when logs are insufficient.
 
+```mermaid
+flowchart TD
+  Start[Pod not working] --> Status[kubectl get pods]
+  Status -->|CrashLoopBackOff| Logs[kubectl logs --previous]
+  Status -->|ImagePullBackOff| Image[Check image name + registry]
+  Status -->|Pending| Describe[kubectl describe pod]
+  Status -->|Running but wrong| Exec[kubectl exec + test]
+  Logs --> Fix[Fix app code or config]
+  Image --> Fix2[Fix image tag or pull secret]
+  Describe --> Res{Resources available?}
+  Res -->|No| Scale[Add resources or nodes]
+  Res -->|Yes| Sched[Check node selectors/taints]
+  Exec --> Net[Test connectivity + config]
+```
+
 ---
 
 ### Monitoring
@@ -96,6 +142,15 @@ Probes can check health in four ways:
 **`kubectl top pods --sort-by=memory`** — Sort Pods by memory usage.
 
 **metrics-server** — A cluster add-on that aggregates resource usage from the kubelet. Without it, `kubectl top` returns "Metrics API not available". Install it in clusters that do not have it (e.g., minikube, kind).
+
+```mermaid
+graph LR
+  MS[metrics-server] -->|collects| Node[Node Metrics]
+  MS -->|collects| Pod[Pod Metrics]
+  Node --> TopN[kubectl top nodes]
+  Pod --> TopP[kubectl top pods]
+  TopP --> Sort["kubectl top pods --sort-by=cpu"]
+```
 
 ---
 
@@ -260,6 +315,21 @@ The Endpoints list is empty (or has no addresses). The Pod is still Running, but
 
 ```bash
 kubectl patch deployment probe-demo --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet/path", "value": "/ready"}]'
+```
+
+```mermaid
+graph LR
+  subgraph Healthy["All Probes Pass"]
+    H[Pod] -->|In Endpoints| SVC1[Service routes traffic]
+  end
+  subgraph ReadinessFail["Readiness Fails"]
+    R[Pod still running] -.->|Removed from Endpoints| SVC2[Service skips this Pod]
+  end
+  subgraph LivenessFail["Liveness Fails"]
+    L[Pod] -->|Restarted| New[New Container]
+  end
+  style SVC2 fill:#FFE0B2
+  style New fill:#FFCDD2
 ```
 
 ### 6. Use kubectl describe pod to see probe failure events

@@ -1,7 +1,7 @@
 ---
-title: Week 3 — Pods & Multi-Container Patterns
+
+## title: Week 3 — Pods & Multi-Container Patterns
 permalink: /weeks/03-pods-and-multi-container/
----
 
 # Week 3: Pods In Depth & Multi-Container Patterns
 
@@ -11,11 +11,62 @@ A **Pod** is the smallest deployable unit in Kubernetes. It wraps one or more co
 
 **Pod lifecycle.** When you create a Pod, it goes through distinct phases. **Pending** means the Pod has been accepted by the cluster but one or more containers have not yet started. Common causes: the scheduler has not yet placed it on a node, or the node is pulling the container image. **Running** means the Pod is bound to a node and at least one container is running. **Succeeded** means all containers terminated successfully (exit code 0). **Failed** means at least one container failed (non-zero exit). You can observe these transitions with `kubectl get pod -w`.
 
+```mermaid
+stateDiagram-v2
+  [*] --> Pending
+  Pending --> Running : Scheduled + Image pulled
+  Running --> Succeeded : All containers exit 0
+  Running --> Failed : Container exits non-zero
+  Failed --> Running : restartPolicy = Always/OnFailure
+  Succeeded --> [*]
+  Failed --> [*] : restartPolicy = Never
+```
+
 **Restart policies** control what happens when a container exits. **Always** (the default) restarts the container whenever it stops, regardless of exit code. Use this for long-running services like web servers. **OnFailure** restarts only when the container exits with a non-zero code. Use this for batch jobs that may fail and need retries. **Never** never restarts. Use this for one-off tasks that should run once and stop; the Pod will show **Completed** when the container exits successfully.
 
 **Init containers** run before the main application containers. They run in sequence: each init container must complete successfully before the next starts. Use them to wait for dependencies (e.g., a database to be reachable), download configuration, or prepare shared storage. If an init container fails, the Pod stays in Init state and the main containers never start. Init containers are defined under `spec.initContainers` at the same indentation level as `spec.containers`.
 
-**Multi-container patterns** are common on the CKAD exam. A **Sidecar** runs alongside the main container. Examples: a log shipper that tails application logs and sends them to a central system, or a monitoring agent that scrapes metrics. The sidecar shares the Pod's network and volumes with the main container. An **Ambassador** acts as a proxy to external services. The main container talks to localhost; the ambassador forwards traffic to the real backend. This simplifies configuration when the backend URL changes. An **Adapter** transforms output from the main container. For example, the main app writes logs in a custom format; the adapter reformats them to JSON or another standard before they are shipped.
+```mermaid
+graph LR
+  Start[Pod Created] --> Init1[Init Container 1]
+  Init1 -->|Success| Init2[Init Container 2]
+  Init2 -->|Success| Main[Main Containers Start]
+  Init1 -->|Failure| Retry1[Retry Init 1]
+  Retry1 --> Init1
+```
+
+**Multi-container patterns** are common on the CKAD exam. A **Sidecar** runs alongside the main container. Examples: a log shipper that tails application logs and sends them to a central system, or a monitoring agent that scrapes metrics. The sidecar shares the Pod's network and volumes with the main container.
+
+```mermaid
+graph TB
+  subgraph Pod
+    direction LR
+    Main[Main Container<br/>App] -->|writes logs| Vol[(Shared Volume)]
+    Vol -->|reads logs| Sidecar[Sidecar Container<br/>Log Shipper]
+  end
+  Sidecar -->|ships| External[Log Service]
+```
+
+An **Ambassador** acts as a proxy to external services. The main container talks to localhost; the ambassador forwards traffic to the real backend. This simplifies configuration when the backend URL changes.
+
+```mermaid
+graph LR
+  subgraph Pod
+    Main[Main Container] -->|localhost:5432| Ambassador[Ambassador Container<br/>Proxy]
+  end
+  Ambassador -->|remote:5432| DB[(Remote Database)]
+```
+
+An **Adapter** transforms output from the main container. For example, the main app writes logs in a custom format; the adapter reformats them to JSON or another standard before they are shipped.
+
+```mermaid
+graph LR
+  subgraph Pod
+    Main[Main Container] -->|custom format| Vol[(Shared Volume)]
+    Vol -->|reads| Adapter[Adapter Container]
+  end
+  Adapter -->|JSON format| Monitoring[Monitoring System]
+```
 
 **Shared resources.** Containers in a Pod share the same network namespace. They can reach each other via **localhost** and the same port space. They also share volumes. **emptyDir** is a temporary volume created when the Pod starts and deleted when the Pod is removed. It is ideal for sharing data between containers in the same Pod (e.g., an init container writes a config file, the main container reads it).
 
@@ -259,13 +310,11 @@ Five performance-based challenges. Complete each and verify the success criteria
 
 **Success criteria:** Pod is Init:0/1 until `mydb` Service exists. After creating the Service, Pod becomes Running.
 
-<details>
-<summary>Hints</summary>
+Hints
 
 - Use an init container with `command: ["sh", "-c", "until nslookup mydb; do sleep 2; done"]`.
 - The Service can be a simple ClusterIP with no selector (headless) or with a selector pointing to any Pod.
 - Create the Pod first, observe Init state. Then create the Service in the same namespace.
-</details>
 
 ### Challenge 2: Sidecar Log Shipper
 
@@ -273,14 +322,12 @@ Five performance-based challenges. Complete each and verify the success criteria
 
 **Success criteria:** Main container writes to the shared file. `kubectl logs <pod> -c sidecar` shows the tailed content.
 
-<details>
-<summary>Hints</summary>
+Hints
 
 - Use an emptyDir volume mounted at `/var/log` in both containers.
 - Main: `while true; do echo "$(date) log line" >> /var/log/app.log; sleep 3; done`
 - Sidecar: `tail -f /var/log/app.log`
 - Use `-c sidecar` to get logs from the sidecar container.
-</details>
 
 ### Challenge 3: Fix a CrashLoopBackOff
 
@@ -288,13 +335,11 @@ Five performance-based challenges. Complete each and verify the success criteria
 
 **Success criteria:** Pod status is Running. No restarts after the fix.
 
-<details>
-<summary>Hints</summary>
+Hints
 
 - Use `kubectl describe pod broken` to see events and last state.
 - Use `kubectl logs broken --previous` to see logs from the crashed container.
 - Common causes: wrong image name, command that exits immediately, missing required env vars.
-</details>
 
 ### Challenge 4: Resource Limits
 
@@ -302,13 +347,11 @@ Five performance-based challenges. Complete each and verify the success criteria
 
 **Success criteria:** First run: Pod is OOMKilled. After fix: Pod runs without OOMKilled.
 
-<details>
-<summary>Hints</summary>
+Hints
 
 - Use `resources.requests.memory: "64Mi"` and `resources.limits.memory: "128Mi"`.
 - To exceed: use a script that allocates memory (e.g., `dd` or a loop that grows a variable).
 - Fix: either increase the limit to 256Mi or change the app to use less memory.
-</details>
 
 ### Challenge 5: Adapter Pattern
 
@@ -316,13 +359,11 @@ Five performance-based challenges. Complete each and verify the success criteria
 
 **Success criteria:** Main container produces custom format. Adapter outputs valid JSON to stdout. `kubectl logs <pod> -c adapter` shows JSON lines.
 
-<details>
-<summary>Hints</summary>
+Hints
 
 - Main writes to a shared file (emptyDir). Adapter reads and transforms.
 - Use `awk` or `sed` in the adapter to parse and reformat, or a simple script.
 - Example: `echo "INFO: request received" >> /shared/app.log` (main); adapter tails and transforms.
-</details>
 
 ---
 

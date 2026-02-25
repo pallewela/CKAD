@@ -19,11 +19,35 @@ Kubernetes offers several volume types:
 
 **persistentVolumeClaim** — Connects the Pod to durable storage. The Pod requests storage via a PersistentVolumeClaim (PVC); Kubernetes binds it to a PersistentVolume (PV) or provisions storage dynamically.
 
+```mermaid
+graph TD
+  Volumes[Volume Types] --> Ephemeral[Ephemeral]
+  Volumes --> Persistent[Persistent]
+  Ephemeral --> ED[emptyDir]
+  Ephemeral --> CM[configMap]
+  Ephemeral --> SEC[secret]
+  Persistent --> HP[hostPath]
+  Persistent --> PVC[persistentVolumeClaim]
+  PVC --> PV[PersistentVolume]
+  PV --> SC[StorageClass]
+```
+
 A **PersistentVolume (PV)** is a piece of storage provisioned by an admin. Think of it as a hard drive available in the cluster. It has capacity, access modes, and a reclaim policy.
 
 A **PersistentVolumeClaim (PVC)** is a request for storage by a Pod. Think of it as "I need a 5GB disk." The user specifies size, access mode, and optionally a StorageClass. Kubernetes matches the PVC to a suitable PV.
 
 **Binding** — When a PVC is created, the control plane finds a PV that satisfies the request (capacity, access modes, StorageClass). If one exists, it binds the PVC to that PV. The PVC status becomes "Bound."
+
+```mermaid
+stateDiagram-v2
+  [*] --> Available : PV created
+  Available --> Bound : PVC claims it
+  Bound --> Released : PVC deleted
+  Released --> Available : Reclaim = Recycle
+  Released --> Deleted : Reclaim = Delete
+  Released --> Released : Reclaim = Retain
+  Deleted --> [*]
+```
 
 **Access modes** — Define how the volume can be used:
 - **ReadWriteOnce (RWO)** — Read and write by a single node at a time. Most block storage (e.g., AWS EBS, GCP PD) supports this.
@@ -37,6 +61,19 @@ A **PersistentVolumeClaim (PVC)** is a request for storage by a Pod. Think of it
 A **StorageClass** defines how storage is provisioned dynamically. Instead of admins creating PVs by hand, a provisioner (e.g., AWS EBS, GCP PD) creates a PV when a PVC is created. The PVC references the StorageClass by name.
 
 A **StatefulSet** is a workload API like Deployment, but it gives each Pod a stable identity (ordinal hostname like `mysql-0`, `mysql-1`) and its own PVC via `volumeClaimTemplates`. When a Pod is recreated, it gets the same PVC and thus the same data.
+
+```mermaid
+graph TD
+  SS[StatefulSet: mysql] --> P0[Pod: mysql-0]
+  SS --> P1[Pod: mysql-1]
+  SS --> P2[Pod: mysql-2]
+  P0 --> PVC0[PVC: data-mysql-0]
+  P1 --> PVC1[PVC: data-mysql-1]
+  P2 --> PVC2[PVC: data-mysql-2]
+  PVC0 --> PV0[PV auto-provisioned]
+  PVC1 --> PV1[PV auto-provisioned]
+  PVC2 --> PV2[PV auto-provisioned]
+```
 
 ## Beginner Tutorial
 
@@ -174,6 +211,16 @@ spec:
 kubectl apply -f pv-pod-2.yaml
 kubectl logs pv-pod-2
 # Output: persistent-data
+```
+
+```mermaid
+graph LR
+  Pod1[Pod v1] -->|writes data| PVC[PVC]
+  PVC --> PV[(PersistentVolume)]
+  Pod1 -->|deleted| Gone[Pod removed]
+  Pod2[Pod v2] -->|mounts same PVC| PVC
+  Pod2 -->|reads data| PV
+  style PV fill:#90EE90
 ```
 
 ### 6. Use the default StorageClass for dynamic provisioning

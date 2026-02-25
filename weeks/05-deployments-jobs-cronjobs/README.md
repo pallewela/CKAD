@@ -13,13 +13,62 @@ Kubernetes provides several workload controllers to run different types of appli
 
 **Deployment** is the standard way to run stateless applications in Kubernetes. A Deployment creates and manages ReplicaSets, which in turn manage Pods. Deployments add two critical capabilities: rolling updates and rollbacks. When you change the container image or other Pod template fields, the Deployment creates a new ReplicaSet and gradually shifts traffic from the old one to the new one.
 
+```mermaid
+graph TD
+  D[Deployment] -->|manages| RS1[ReplicaSet v1]
+  D -->|manages| RS2[ReplicaSet v2]
+  RS1 --> P1[Pod 1]
+  RS1 --> P2[Pod 2]
+  RS1 --> P3[Pod 3]
+  RS2 -.->|scaled to 0 after update| None[no pods]
+  style RS2 fill:#f0f0f0,stroke:#999
+```
+
 **Rolling Update** is the default update strategy. Two fields control the pace: `maxSurge` (how many extra Pods can exist during the update beyond the desired count) and `maxUnavailable` (how many Pods can be unavailable during the update). The default for both is 25%. For example, with 4 replicas and 25% each, Kubernetes might create 1 new Pod and allow 1 old Pod to be unavailable at a time, ensuring continuous availability.
+
+```mermaid
+sequenceDiagram
+  participant RS1 as Old ReplicaSet
+  participant RS2 as New ReplicaSet
+  Note over RS1: 3 Pods running v1
+  RS2->>RS2: Start 1 Pod (v2)
+  Note over RS2: 1 Pod v2 Ready
+  RS1->>RS1: Terminate 1 Pod (v1)
+  RS2->>RS2: Start 1 more Pod (v2)
+  RS1->>RS1: Terminate 1 Pod (v1)
+  RS2->>RS2: Start 1 more Pod (v2)
+  RS1->>RS1: Terminate last Pod (v1)
+  Note over RS2: 3 Pods running v2
+```
 
 **Rollback** lets you revert to a previous version. The command `kubectl rollout undo` switches back to the previous ReplicaSet. Each update creates a new revision, and you can undo to a specific revision with `--to-revision=N`.
 
 **Job** runs one or more Pods until they complete successfully. Unlike Deployments, Jobs are for batch or one-off tasks. Key fields: `completions` (how many successful runs are needed), `parallelism` (how many Pods run at once), `backoffLimit` (retries on failure, default 6), and `activeDeadlineSeconds` (maximum time for the Job). Jobs require `restartPolicy: Never` or `OnFailure`; `Always` is invalid.
 
+```mermaid
+graph LR
+  Job[Job] -->|creates| P1[Pod 1]
+  P1 -->|completes| C1[Completion 1/3]
+  Job -->|creates| P2[Pod 2]
+  P2 -->|completes| C2[Completion 2/3]
+  Job -->|creates| P3[Pod 3]
+  P3 -->|completes| C3[Completion 3/3]
+  C3 --> Done[Job Complete]
+  style Done fill:#90EE90
+```
+
 **CronJob** schedules Jobs to run at specified times using cron syntax. The format is "minute hour day-of-month month day-of-week" (e.g., `*/5 * * * *` means every 5 minutes). Important fields: `concurrencyPolicy` (Allow, Forbid, or Replace for overlapping runs), `startingDeadlineSeconds` (tolerance for missed schedules), and `successfulJobsHistoryLimit` (how many completed Jobs to retain).
+
+```mermaid
+graph LR
+  Cron[CronJob<br/>schedule: */5 * * * *] -->|every 5 min| J1[Job 1]
+  Cron -->|every 5 min| J2[Job 2]
+  Cron -->|every 5 min| J3[Job 3]
+  J1 --> P1[Pod]
+  J2 --> P2[Pod]
+  J3 --> P3[Pod]
+  J1 -->|completed| H[History limit: 3]
+```
 
 **DaemonSet** runs exactly one Pod on every node (or every node matching a selector). Use it for node-level agents like log collectors or monitoring. It is mentioned here for awareness; the exam may reference it.
 

@@ -13,6 +13,16 @@ The CKAD exam is a performance-based assessment delivered through PSI Bridge. Un
 
 **Allowed resources.** During the exam you may use only two sites: kubernetes.io/docs and kubernetes.io/blog. No other tabs, search engines, or external documentation. Bookmark these URLs before the exam. The PSI Bridge environment provides an Ubuntu terminal and a browser; you will work with one monitor. Familiarize yourself with this setup beforehand. Practice with a single terminal and a single docs tab open to simulate the real constraints.
 
+```mermaid
+graph LR
+  You[You] --> Terminal[Ubuntu Terminal]
+  You --> Browser[Browser Tab]
+  Terminal --> kubectl[kubectl + vim/nano]
+  Browser --> Docs[kubernetes.io/docs ONLY]
+  Terminal -->|context switch| Cluster1[Cluster 1]
+  Terminal -->|context switch| Cluster2[Cluster 2]
+```
+
 **Scoring and results.** You need 66% to pass. Results are typically available within 24 hours via email. If you fail, one free retake is included with your exam purchase. Use the gap between attempts to focus on weak domains and practice more. Do not rush to retake; analyze your score report and drill the areas where you lost points.
 
 **Mental preparation.** Sleep well the night before. Use the bathroom before starting. Stay calm; partial credit is awarded. If a task feels impossible, move on and return later. Confidence comes from practice, so complete mock exams under timed conditions.
@@ -20,6 +30,15 @@ The CKAD exam is a performance-based assessment delivered through PSI Bridge. Un
 **killer.sh** is the best mock exam simulator. Two free sessions come with your exam purchase. Use them to experience the real environment: same terminal, same browser constraints, similar question style. Run through killer.sh at least once before your exam date. Treat each session as a dress rehearsal: time yourself, switch contexts correctly, and use only the allowed documentation. The questions are harder than the real exam, so if you can complete killer.sh tasks, you are well prepared.
 
 **Final review strategy.** Focus on the highest-weight domains: Config & Security (25%), Design & Build (20%), Deployment (20%), and Networking (20%). These four areas account for 85% of the exam. Master the imperative commands for Pods, Deployments, Services, ConfigMaps, Secrets, Jobs, RBAC, and NetworkPolicies. Allocate your remaining study time proportionally to these weights rather than spreading effort evenly across all topics.
+
+```mermaid
+pie title CKAD Exam Domain Weights
+  "Config and Security 25%" : 25
+  "Design and Build 20%" : 20
+  "Deployment 20%" : 20
+  "Networking 20%" : 20
+  "Observability 15%" : 15
+```
 
 **The 80/20 rule.** Roughly 80% of exam tasks use 20% of kubectl commands. Get fluent with: `kubectl run`, `kubectl create`, `kubectl expose`, `kubectl get`, `kubectl describe`, `kubectl edit`, `kubectl config use-context`, and `kubectl explain`. Use `--dry-run=client -o yaml` to generate manifests instead of writing YAML from memory. Speed comes from muscle memory: run these commands hundreds of times before exam day so your fingers know the patterns without thinking.
 
@@ -89,6 +108,23 @@ This is NOT a standard tutorial — it is a structured exam simulation guide:
 20. `kubectl create ingress myingress --rule="myhost.com/=mysvc:80"`
 
 </details>
+
+```mermaid
+graph TD
+  NS[1. Namespace] --> Deploy[3. Deployment]
+  NS --> CM[6. ConfigMap]
+  NS --> Sec[7. Secret]
+  Deploy --> SVC[4-5. Service]
+  Deploy --> Probe[11-12. Probes]
+  SVC --> Ingress[20. Ingress]
+  CM --> Pod[10. Pod with config]
+  Sec --> Pod
+  NS --> SA[15. ServiceAccount]
+  SA --> Role[16. Role]
+  Role --> RB[17. RoleBinding]
+  NS --> NP[18. NetworkPolicy]
+  NS --> PVC[19. PVC]
+```
 
 4. **Review your weak spots based on the speed run**
 

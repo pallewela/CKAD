@@ -23,6 +23,16 @@ A **Repository** is where charts are stored and published. It is like a cookbook
 
 **Key Helm commands**: `helm install` creates a new release; `helm upgrade` updates an existing release (or installs if it does not exist); `helm rollback` reverts to a previous revision; `helm uninstall` removes a release; `helm list` shows all releases; `helm template` renders the chart to raw YAML without installing (essential for debugging and previewing); `helm show values` displays the default values for a chart.
 
+```mermaid
+graph TD
+  Repo[Chart Repository] -->|helm pull| Chart[Chart]
+  Chart -->|helm install| Release[Release in Cluster]
+  Values[values.yaml + --set] -->|customize| Release
+  Release -->|helm upgrade| Release2[Updated Release]
+  Release2 -->|helm rollback| Release
+  Release -->|helm uninstall| Gone[Removed]
+```
+
 **Kustomize: Declarative YAML Customization**
 
 Kustomize is an alternative to Helm for customizing YAML without templating. It uses a base plus overlays pattern.
@@ -35,6 +45,22 @@ The **kustomization.yaml** is the manifest that describes what to customize. It 
 
 Kustomize is built into kubectl. You apply a kustomization with `kubectl apply -k <path-to-overlay>`.
 
+```mermaid
+graph TD
+  subgraph Base
+    BK[kustomization.yaml] --> BD[deployment.yaml]
+    BK --> BS[service.yaml]
+  end
+  subgraph Staging["Overlay: staging"]
+    SK[kustomization.yaml] -->|references base| BK
+    SK --> SP[patch: replicas=3]
+  end
+  subgraph Prod["Overlay: production"]
+    PK[kustomization.yaml] -->|references base| BK
+    PK --> PP[patch: replicas=5, limits]
+  end
+```
+
 **Custom Resource Definitions (CRDs)**
 
 Kubernetes ships with built-in resources: Pods, Deployments, Services, ConfigMaps, and so on. CRDs let you define your own resource types.
@@ -44,6 +70,13 @@ A **CRD (Custom Resource Definition)** defines the schema for your custom resour
 A **Custom Resource (CR)** is an instance of a CRD. For example, if you define a CRD called "Widget", you can create Widget objects in your cluster with `kubectl apply -f widget.yaml`. You list them with `kubectl get widgets` (using the plural from the CRD's `names.plural`).
 
 **Operators** are controllers that watch CRs and automate tasks. For example, a Database operator might watch "Database" CRs and create StatefulSets, Services, and PersistentVolumes when you create a Database resource. Operators extend Kubernetes with domain-specific logic.
+
+```mermaid
+graph LR
+  CRD[CustomResourceDefinition<br/>defines schema] -->|enables| CR[Custom Resource<br/>instance]
+  CR -->|watched by| Op[Operator / Controller]
+  Op -->|manages| Resources[Pods, Services, etc.]
+```
 
 **Security: RBAC, SecurityContext, and Admission**
 
@@ -59,11 +92,37 @@ A **RoleBinding** assigns a Role to a user, group, or ServiceAccount within a na
 
 A **ClusterRoleBinding** assigns a ClusterRole to a subject cluster-wide.
 
+```mermaid
+graph TD
+  SA[ServiceAccount] -->|bound by| RB[RoleBinding]
+  RB -->|references| R[Role]
+  R -->|permits| Actions["verbs: get, list, watch"]
+  R -->|on| Res["resources: pods, services"]
+  SA2[ServiceAccount] -->|bound by| CRB[ClusterRoleBinding]
+  CRB -->|references| CR2[ClusterRole]
+  CR2 -->|cluster-wide access| AllNS[All Namespaces]
+  style R fill:#bbdefb
+  style CR2 fill:#c8e6c9
+```
+
 **SecurityContext** controls how containers and pods run from a security perspective.
 
 At the **Pod level**: `runAsUser`, `runAsGroup`, `fsGroup`, `runAsNonRoot` control who the containers run as and ownership of volumes. `fsGroup` sets the group ownership of mounted volumes.
 
 At the **Container level**: `capabilities` (add/drop Linux capabilities like NET_BIND_SERVICE), `readOnlyRootFilesystem`, and `allowPrivilegeEscalation` provide fine-grained control per container. Capabilities are container-level only, not pod-level. `readOnlyRootFilesystem: true` requires writable paths (e.g., emptyDir for /tmp) for apps that need to write; otherwise the container may crash.
+
+```mermaid
+graph TD
+  PodSec[Pod SecurityContext] --> RunUser[runAsUser: 1000]
+  PodSec --> RunNonRoot[runAsNonRoot: true]
+  PodSec --> FSGroup[fsGroup: 2000]
+  ContSec[Container SecurityContext] --> ReadOnly[readOnlyRootFilesystem: true]
+  ContSec --> NoPE[allowPrivilegeEscalation: false]
+  ContSec --> Caps[capabilities: drop ALL]
+  PodSec -->|inherited by| ContSec
+  style PodSec fill:#bbdefb
+  style ContSec fill:#c8e6c9
+```
 
 **Admission Controllers** intercept API requests before they are persisted. A **ValidatingWebhookConfiguration** sends requests to an external service; if the service rejects, the request is denied. A **MutatingWebhookConfiguration** sends requests to an external service; the service can modify the object before it is stored.
 

@@ -65,6 +65,10 @@ exclude:
   - .ignore
   - README.md
 
+# Mermaid diagrams (rendered client-side)
+mermaid:
+  version: "11"
+
 # Markdown (kramdown is default; improve code blocks)
 markdown: kramdown
 kramdown:
