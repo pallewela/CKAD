@@ -48,42 +48,47 @@ pie title CKAD Exam Domain Weights
 
 This is NOT a standard tutorial — it is a structured exam simulation guide:
 
-1. **Set up your environment exactly like the exam:**
-   - Open ONE terminal window
-   - Open ONE browser tab with kubernetes.io/docs
-   - Set up aliases and autocompletion
-   - Close all other apps
+### 1. Set up your environment exactly like the exam
 
-2. **Context switching practice:**
-   ```bash
-   kubectl config use-context cluster1
-   kubectl config current-context
-   ```
+- Open ONE terminal window
+- Open ONE browser tab with kubernetes.io/docs
+- Set up aliases and autocompletion
+- Close all other apps
 
-3. **The 20-task speed run.** Create each of these resources as fast as possible using imperative commands. Time yourself. Target: under 40 minutes total.
+### 2. Context switching practice
 
-   For each task, provide the exact imperative command:
+```bash
+kubectl config use-context cluster1
+kubectl config current-context
+```
 
-   1. Pod running nginx
-   2. Pod with labels app=web,tier=frontend
-   3. Deployment with 3 replicas
-   4. ClusterIP Service
-   5. NodePort Service
-   6. ConfigMap with 3 keys
-   7. Secret with username/password
-   8. Job that runs `echo done`
-   9. CronJob every 10 minutes
-   10. Pod with resource limits
-   11. Pod with liveness probe
-   12. Pod with readiness probe
-   13. Multi-container Pod (generate + edit)
-   14. Namespace with ResourceQuota
-   15. ServiceAccount
-   16. Role with get/list on pods
-   17. RoleBinding
-   18. NetworkPolicy default-deny
-   19. PVC requesting 1Gi
-   20. Ingress routing to a service
+### 3. The 20-task speed run
+
+Create each of these resources as fast as possible using imperative commands. Time yourself. Target: under 40 minutes total.
+
+For each task, provide the exact imperative command:
+
+1. Pod running nginx
+2. Pod with labels app=web,tier=frontend
+3. Deployment with 3 replicas
+4. ClusterIP Service
+5. NodePort Service
+6. ConfigMap with 3 keys
+7. Secret with username/password
+8. Job that runs `echo done`
+9. CronJob every 10 minutes
+10. Pod with resource limits
+11. Pod with liveness probe
+12. Pod with readiness probe
+13. Multi-container Pod (generate + edit)
+14. Namespace with ResourceQuota
+15. ServiceAccount
+16. Role with get/list on pods
+17. RoleBinding
+18. NetworkPolicy default-deny
+19. PVC requesting 1Gi
+20. Ingress routing to a service
+
 
 <details>
 <summary>Speed run command reference</summary>

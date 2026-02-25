@@ -107,49 +107,59 @@ graph TD
 
 Follow these steps to build hands-on familiarity with the cluster and core resources.
 
-1. **Create a local cluster with kind.** If you have not already, install kind and kubectl using the [Setup.md](../../Setup.md) guide. Then run:
-   ```bash
-   kind create cluster --name ckad
-   ```
-   This creates a single-node cluster named `ckad`. The node runs both the Control Plane and workloads.
+### 1. Create a local cluster with kind
 
-2. **Run `kubectl cluster-info` and explain the output.**
-   ```bash
-   kubectl cluster-info
-   ```
-   Expected output (abbreviated):
-   ```
-   Kubernetes control plane is running at https://127.0.0.1:xxxxx
-   CoreDNS is running at https://127.0.0.1:xxxxx/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-   ```
-   This shows the API Server address (the control plane endpoint) and that CoreDNS (the cluster DNS) is running.
+If you have not already, install kind and kubectl using the [Setup.md](../../Setup.md) guide. Then run:
 
-3. **Run `kubectl get nodes` — explain Ready status.**
-   ```bash
-   kubectl get nodes
-   ```
-   Expected output:
-   ```
-   NAME                 STATUS   ROLES           AGE   VERSION
-   ckad-control-plane   Ready    control-plane   1m    v1.28.x
-   ```
-   `Ready` means the node is healthy and can accept workloads. The kubelet has reported that the node is ready to the API Server.
+```bash
+kind create cluster --name ckad
+```
 
-4. **Write a Pod YAML from scratch.** Create a file `pod.yaml`:
-   ```yaml
-   apiVersion: v1
-   kind: Pod
-   metadata:
-     name: my-first-pod
-     labels:
-       app: hello
-   spec:
-     containers:
-       - name: hello
-         image: nginx:alpine
-         ports:
-           - containerPort: 80
-   ```
+This creates a single-node cluster named `ckad`. The node runs both the Control Plane and workloads.
+
+### 2. Run `kubectl cluster-info` and explain the output
+
+```bash
+kubectl cluster-info
+```
+
+Expected output (abbreviated):
+```
+Kubernetes control plane is running at https://127.0.0.1:xxxxx
+CoreDNS is running at https://127.0.0.1:xxxxx/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+```
+This shows the API Server address (the control plane endpoint) and that CoreDNS (the cluster DNS) is running.
+
+### 3. Run `kubectl get nodes` — explain Ready status
+
+```bash
+kubectl get nodes
+```
+
+Expected output:
+```
+NAME                 STATUS   ROLES           AGE   VERSION
+ckad-control-plane   Ready    control-plane   1m    v1.28.x
+```
+`Ready` means the node is healthy and can accept workloads. The kubelet has reported that the node is ready to the API Server.
+
+### 4. Write a Pod YAML from scratch
+
+Create a file `pod.yaml`:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-first-pod
+  labels:
+    app: hello
+spec:
+  containers:
+    - name: hello
+      image: nginx:alpine
+      ports:
+        - containerPort: 80
+```
 
 ```mermaid
 graph TB
@@ -162,77 +172,99 @@ graph TB
   NS3 --> Proxy[kube-proxy]
 ```
 
-5. **Apply it with `kubectl apply -f pod.yaml`.**
-   ```bash
-   kubectl apply -f pod.yaml
-   ```
-   Expected output:
-   ```
-   pod/my-first-pod created
-   ```
+### 5. Apply it with `kubectl apply -f pod.yaml`
 
-6. **Explore with common kubectl commands.**
-   ```bash
-   kubectl get pods
-   ```
-   Expected (once the Pod is running):
-   ```
-   NAME           READY   STATUS    RESTARTS   AGE
-   my-first-pod   1/1     Running   0          30s
-   ```
-   ```bash
-   kubectl describe pod my-first-pod
-   ```
-   This shows detailed info: IP, node, events, container status. Check the Events section at the bottom for scheduling and startup messages.
-   ```bash
-   kubectl logs my-first-pod
-   ```
-   Shows the nginx container's stdout logs.
+```bash
+kubectl apply -f pod.yaml
+```
 
-7. **Exec into it.**
-   ```bash
-   kubectl exec -it my-first-pod -- /bin/sh
-   ```
-   You are now inside the container. Run `ls`, `cat /etc/nginx/nginx.conf`, then type `exit` to leave.
+Expected output:
+```
+pod/my-first-pod created
+```
 
-8. **Create a namespace.**
-   ```bash
-   kubectl create namespace dev
-   ```
-   Output: `namespace/dev created`
+### 6. Explore with common kubectl commands
 
-9. **Deploy a pod in that namespace.**
-   ```bash
-   kubectl run nginx --image=nginx -n dev
-   ```
-   This creates a Pod named `nginx` in the `dev` namespace using the imperative `run` command.
+```bash
+kubectl get pods
+```
 
-10. **Switch context namespace.**
-    ```bash
-    kubectl config set-context --current --namespace=dev
-    ```
-    Now `kubectl get pods` (without `-n`) shows Pods in `dev` by default.
+Expected (once the Pod is running):
+```
+NAME           READY   STATUS    RESTARTS   AGE
+my-first-pod   1/1     Running   0          30s
+```
 
-11. **Use `kubectl explain` to discover fields.**
-    ```bash
-    kubectl explain pod.spec.containers
-    ```
-    This prints the schema for the `containers` field. Use it during the exam to recall field names and structure.
+```bash
+kubectl describe pod my-first-pod
+```
 
-12. **Use `kubectl api-resources` to list all resource types.**
-    ```bash
-    kubectl api-resources
-    ```
-    Shows resource names, short names (e.g., `po` for pods), API group, and whether they are namespaced.
+This shows detailed info: IP, node, events, container status. Check the Events section at the bottom for scheduling and startup messages.
 
-13. **Delete resources and clean up.**
-    ```bash
-    kubectl delete pod my-first-pod
-    kubectl delete pod nginx -n dev
-    kubectl delete namespace dev
-    kubectl config set-context --current --namespace=default
-    kind delete cluster --name ckad
-    ```
+```bash
+kubectl logs my-first-pod
+```
+
+Shows the nginx container's stdout logs.
+
+### 7. Exec into it
+
+```bash
+kubectl exec -it my-first-pod -- /bin/sh
+```
+
+You are now inside the container. Run `ls`, `cat /etc/nginx/nginx.conf`, then type `exit` to leave.
+
+### 8. Create a namespace
+
+```bash
+kubectl create namespace dev
+```
+
+Output: `namespace/dev created`
+
+### 9. Deploy a pod in that namespace
+
+```bash
+kubectl run nginx --image=nginx -n dev
+```
+
+This creates a Pod named `nginx` in the `dev` namespace using the imperative `run` command.
+
+### 10. Switch context namespace
+
+```bash
+kubectl config set-context --current --namespace=dev
+```
+
+Now `kubectl get pods` (without `-n`) shows Pods in `dev` by default.
+
+### 11. Use `kubectl explain` to discover fields
+
+```bash
+kubectl explain pod.spec.containers
+```
+
+This prints the schema for the `containers` field. Use it during the exam to recall field names and structure.
+
+### 12. Use `kubectl api-resources` to list all resource types
+
+```bash
+kubectl api-resources
+```
+
+Shows resource names, short names (e.g., `po` for pods), API group, and whether they are namespaced.
+
+### 13. Delete resources and clean up
+
+```bash
+kubectl delete pod my-first-pod
+kubectl delete pod nginx -n dev
+kubectl delete namespace dev
+kubectl config set-context --current --namespace=default
+kind delete cluster --name ckad
+```
+
 
 ---
 

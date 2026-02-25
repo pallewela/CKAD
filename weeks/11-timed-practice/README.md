@@ -62,30 +62,37 @@ graph TD
 
 ## Beginner Tutorial
 
-1. **Set up aliases and autocompletion (from Week 1)**  
-   Ensure `k` is aliased to `kubectl` and that `source <(kubectl completion bash)` (or zsh) is in your shell config.
+### 1. Set up aliases and autocompletion
 
-2. **Practice context switching**  
-   Create two kind clusters: `kind create cluster --name cluster-a` and `kind create cluster --name cluster-b`. Use `kubectl config get-contexts` to list contexts, then `kubectl config use-context kind-cluster-a` and `kind-cluster-b` to switch. Verify with `kubectl cluster-info`.
+Ensure `k` is aliased to `kubectl` and that `source <(kubectl completion bash)` (or zsh) is in your shell config. (See Week 1 for details).
 
-3. **Practice the imperative workflow for each resource type:**
-   - Pod: `k run mypod --image=nginx --dry-run=client -o yaml > pod.yaml`
-   - Deployment: `k create deployment mydeploy --image=nginx --dry-run=client -o yaml > deploy.yaml`
-   - Service: `k expose deployment mydeploy --port=80 --dry-run=client -o yaml > svc.yaml`
-   - ConfigMap: `k create configmap mycm --from-literal=KEY=value --dry-run=client -o yaml > cm.yaml`
-   - Secret: `k create secret generic mysecret --from-literal=KEY=value --dry-run=client -o yaml > secret.yaml`
-   - Job: `k create job myjob --image=busybox -- echo hello --dry-run=client -o yaml > job.yaml`
-   - CronJob: `k create cronjob mycron --image=busybox --schedule="*/5 * * * *" -- echo date --dry-run=client -o yaml > cronjob.yaml`
-   - Ingress: `k create ingress myingress --rule="host/path=svc:port" --dry-run=client -o yaml > ingress.yaml`
-   - ServiceAccount: `k create serviceaccount mysa --dry-run=client -o yaml > sa.yaml`
-   - Role: `k create role myrole --verb=get,list --resource=pods --dry-run=client -o yaml > role.yaml`
-   - RoleBinding: `k create rolebinding myrb --role=myrole --serviceaccount=ns:mysa --dry-run=client -o yaml > rb.yaml`
+### 2. Practice context switching
 
-4. **Practice vim**  
-   Open a Deployment YAML, add a `livenessProbe` and `readinessProbe` section under `containers`, save with `:wq`, and apply the file.
+Create two kind clusters: `kind create cluster --name cluster-a` and `kind create cluster --name cluster-b`. Use `kubectl config get-contexts` to list contexts, then `kubectl config use-context kind-cluster-a` and `kind-cluster-b` to switch. Verify with `kubectl cluster-info`.
 
-5. **Practice `kubectl explain`**  
-   Use `kubectl explain pod.spec.containers` and `kubectl explain deployment.spec.template.spec.containers` to find field paths quickly instead of searching the docs.
+### 3. Practice the imperative workflow
+
+Practice creating each resource type using `--dry-run=client -o yaml`:
+
+- **Pod**: `k run mypod --image=nginx --dry-run=client -o yaml > pod.yaml`
+- **Deployment**: `k create deployment mydeploy --image=nginx --replicas=3 --dry-run=client -o yaml > deploy.yaml`
+- **Service**: `k expose deployment mydeploy --port=80 --dry-run=client -o yaml > svc.yaml`
+- **ConfigMap**: `k create configmap mycm --from-literal=KEY=value --dry-run=client -o yaml > cm.yaml`
+- **Secret**: `k create secret generic mysecret --from-literal=KEY=value --dry-run=client -o yaml > secret.yaml`
+- **Job**: `k create job myjob --image=busybox -- echo hello --dry-run=client -o yaml > job.yaml`
+- **CronJob**: `k create cronjob mycron --image=busybox --schedule="*/5 * * * *" -- echo date --dry-run=client -o yaml > cronjob.yaml`
+- **Ingress**: `k create ingress myingress --rule="host/path=svc:port" --dry-run=client -o yaml > ingress.yaml`
+- **ServiceAccount**: `k create serviceaccount mysa --dry-run=client -o yaml > sa.yaml`
+- **Role**: `k create role myrole --verb=get,list --resource=pods --dry-run=client -o yaml > role.yaml`
+- **RoleBinding**: `k create rolebinding myrb --role=myrole --serviceaccount=ns:mysa --dry-run=client -o yaml > rb.yaml`
+
+### 4. Practice vim
+
+Open a Deployment YAML, add a `livenessProbe` and `readinessProbe` section under `containers`, save with `:wq`, and apply the file.
+
+### 5. Practice `kubectl explain`
+
+Use `kubectl explain pod.spec.containers` and `kubectl explain deployment.spec.template.spec.containers` to find field paths quickly instead of searching the docs.
 
 ## Hands-On Lab
 

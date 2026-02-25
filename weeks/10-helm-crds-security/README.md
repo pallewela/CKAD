@@ -134,67 +134,69 @@ graph TD
 
 Follow these steps to build hands-on familiarity with Helm, Kustomize, CRDs, and RBAC.
 
-1. Install Helm:
+### 1. Install Helm
 
 ```bash
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 ```
 
-2. Add Bitnami repo:
+### 2. Add Bitnami repo
 
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update
 ```
 
-3. Search for charts:
+### 3. Search for charts
 
 ```bash
 helm search repo nginx
 ```
 
-4. Show chart values:
+### 4. Show chart values
 
 ```bash
 helm show values bitnami/nginx | head -50
 ```
 
-5. Install a release:
+### 5. Install a release
 
 ```bash
 helm install my-nginx bitnami/nginx --set replicaCount=2
 ```
 
-6. List releases:
+### 6. List releases
 
 ```bash
 helm list
 ```
 
-7. Upgrade:
+### 7. Upgrade
 
 ```bash
 helm upgrade my-nginx bitnami/nginx --set replicaCount=4
 ```
 
-8. Rollback:
+### 8. Rollback
 
 ```bash
 helm rollback my-nginx 1
 ```
 
-9. Template (preview YAML):
+### 9. Template (preview YAML)
 
 ```bash
 helm template my-nginx bitnami/nginx --set replicaCount=2
 ```
 
-10. Uninstall:
+### 10. Uninstall
 
 ```bash
 helm uninstall my-nginx
 ```
 
-11. Kustomize — create a base directory with a Deployment YAML and kustomization.yaml, create a staging overlay that changes replica count.
+### 11. Kustomize basics
+
+Create a base directory with a Deployment YAML and kustomization.yaml, create a staging overlay that changes replica count.
 
 Create the directory structure:
 
@@ -247,7 +249,9 @@ commonLabels:
   env: staging
 ```
 
-12. Apply with `kubectl apply -k overlays/staging/`:
+### 12. Apply with Kustomize
+
+Apply with `kubectl apply -k overlays/staging/`:
 
 ```bash
 kubectl apply -k kustomize-demo/overlays/staging/
@@ -259,7 +263,7 @@ Verify:
 kubectl get deployments -l env=staging
 ```
 
-13. Create a CRD:
+### 13. Create a CRD
 
 ```yaml
 apiVersion: apiextensions.k8s.io/v1
@@ -296,7 +300,7 @@ Save as `crd-widgets.yaml` and apply:
 kubectl apply -f crd-widgets.yaml
 ```
 
-14. Create a custom resource instance:
+### 14. Create a custom resource instance
 
 ```yaml
 apiVersion: example.com/v1
@@ -315,7 +319,7 @@ kubectl apply -f widget-red.yaml
 kubectl get widgets
 ```
 
-15. Create a Role and RoleBinding:
+### 15. Create a Role and RoleBinding
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -353,7 +357,9 @@ Apply the Role and RoleBinding:
 kubectl apply -f rbac-pod-reader.yaml
 ```
 
-16. Test with `kubectl auth can-i list pods --as=system:serviceaccount:default:mysa`:
+### 16. Test RBAC permissions
+
+Test with `kubectl auth can-i`:
 
 ```bash
 kubectl auth can-i list pods --as=system:serviceaccount:default:mysa
@@ -367,7 +373,9 @@ kubectl auth can-i delete pods --as=system:serviceaccount:default:mysa
 
 Expected output: `no`
 
-17. SecurityContext: create a Pod that cannot run as root:
+### 17. SecurityContext: Non-root Pod
+
+Create a Pod that cannot run as root:
 
 ```yaml
 apiVersion: v1
@@ -392,6 +400,7 @@ kubectl exec nonroot-pod -- id
 ```
 
 Expected: `uid=1000 gid=3000` (not root).
+
 
 ---
 

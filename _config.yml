@@ -7,6 +7,9 @@ description: A structured, hands-on path to the Certified Kubernetes Application
 # Use remote_theme for GitHub Pages (no Gemfile needed)
 remote_theme: just-the-docs/just-the-docs
 
+# Color scheme supports "light" (default) and "dark"
+color_scheme: light
+
 # If publishing as Project Page (e.g. username.github.io/CKAD), set:
 # baseurl: "/CKAD"
 # For User/Org site (username.github.io), leave baseurl empty:

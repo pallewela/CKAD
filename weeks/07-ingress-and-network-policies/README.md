@@ -213,6 +213,7 @@ spec:
 
 From an allowed Pod (with `role=frontend`), connectivity to `role=backend` should work. From a Pod without the label, it should be blocked (when using a compatible CNI).
 
+
 ## Hands-On Lab
 
 ### Challenge 1: Path-Based Routing
