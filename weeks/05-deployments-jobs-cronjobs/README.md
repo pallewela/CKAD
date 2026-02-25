@@ -1,3 +1,8 @@
+---
+title: Week 5 — Deployments, Jobs & CronJobs
+permalink: /weeks/05-deployments-jobs-cronjobs/
+---
+
 # Week 5: Deployments, Jobs & CronJobs
 
 ## The Concept

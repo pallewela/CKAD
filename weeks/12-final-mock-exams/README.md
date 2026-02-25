@@ -1,3 +1,8 @@
+---
+title: Week 12 — Final Mock Exams & Exam Day Preparation
+permalink: /weeks/12-final-mock-exams/
+---
+
 # Week 12: Final Mock Exams & Exam Day Preparation
 
 ## The Concept

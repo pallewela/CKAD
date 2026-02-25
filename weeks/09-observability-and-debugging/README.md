@@ -1,3 +1,8 @@
+---
+title: Week 9 — Observability, Probes & Debugging
+permalink: /weeks/09-observability-and-debugging/
+---
+
 # Week 9: Observability, Probes & Debugging
 
 ## The Concept

@@ -1,3 +1,8 @@
+---
+title: Week 2 — Kubernetes Architecture & Core Concepts
+permalink: /weeks/02-kubernetes-architecture/
+---
+
 # Week 2: Kubernetes Architecture & Core Concepts
 
 ## The Concept

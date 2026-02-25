@@ -1,3 +1,8 @@
+---
+title: Week 4 — ConfigMaps, Secrets & SecurityContext
+permalink: /weeks/04-configmaps-secrets-security/
+---
+
 # Week 4: Configuration — ConfigMaps, Secrets & SecurityContext
 
 ## The Concept

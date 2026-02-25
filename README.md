@@ -78,4 +78,26 @@ Each week has a folder under `weeks/` with a **README.md** containing:
 - [Setup](Setup.md) — kind/minikube, kubectl, Go app in cluster
 - [Week 1](weeks/01-containers-and-docker/README.md) — Start here after setup
 
+---
+
+## GitHub Pages
+
+This repo is set up to build as a **Just the Docs** Jekyll site on GitHub Pages.
+
+1. Push the repo to GitHub.
+2. Go to **Settings → Pages**.
+3. Under **Build and deployment**, choose **GitHub Actions** (recommended) or **Deploy from a branch**:
+   - **Branch:** Select branch (e.g. `main`), folder **/ (root)**, then Save.
+   - GitHub will build with Jekyll and the theme defined in `_config.yml`.
+4. If the site is at `https://<username>.github.io/CKAD/`, set in `_config.yml`:
+   ```yaml
+   baseurl: "/CKAD"
+   ```
+   and update `aux_links` / `gh_edit_repository` with your repo URL.
+5. Optional local preview: `bundle install && bundle exec jekyll serve` then open http://localhost:4000.
+
+You get a docs-style site with sidebar navigation, search, and mobile-friendly pages.
+
+---
+
 Good luck. The exam rewards practice; type more, read less.

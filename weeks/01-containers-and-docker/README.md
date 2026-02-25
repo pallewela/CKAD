@@ -1,3 +1,8 @@
+---
+title: Week 1 — Containers & Docker Fundamentals
+permalink: /weeks/01-containers-and-docker/
+---
+
 # Week 1: Containers & Docker Fundamentals
 
 ## The Concept

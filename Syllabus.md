@@ -1,3 +1,8 @@
+---
+title: Syllabus
+permalink: /syllabus/
+---
+
 # CKAD 12-Week Study Syllabus
 
 > Based on the **CKAD Curriculum v1.34** (Kubernetes 1.34).

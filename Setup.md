@@ -1,3 +1,8 @@
+---
+title: Setup
+permalink: /setup/
+---
+
 # Local Cluster Setup Guide
 
 This guide walks you through setting up a local Kubernetes cluster on your machine.

@@ -1,3 +1,8 @@
+---
+title: Week 6 — Services & Networking
+permalink: /weeks/06-services-and-networking/
+---
+
 # Week 6: Services & Networking
 
 ## The Concept

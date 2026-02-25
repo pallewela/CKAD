@@ -1,3 +1,8 @@
+---
+title: Week 10 — Helm, CRDs & Security Deep Dive
+permalink: /weeks/10-helm-crds-security/
+---
+
 # Week 10: Helm, Custom Resources & Security Deep Dive
 
 ## The Concept

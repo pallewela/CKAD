@@ -1,3 +1,8 @@
+---
+title: Week 11 — Timed Practice & Weak-Spot Drills
+permalink: /weeks/11-timed-practice/
+---
+
 # Week 11: Timed Practice & Weak-Spot Drills
 
 ## The Concept

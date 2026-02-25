@@ -1,3 +1,8 @@
+---
+title: Week 7 — Ingress & Network Policies
+permalink: /weeks/07-ingress-and-network-policies/
+---
+
 # Week 7: Ingress & Network Policies
 
 ## The Concept

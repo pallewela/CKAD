@@ -1,1 +1,5 @@
 .ignore/*
+
+# Jekyll
+_site/
+.jekyll-cache/

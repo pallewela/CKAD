@@ -1,3 +1,8 @@
+---
+title: Week 8 — Persistent Storage & Volumes
+permalink: /weeks/08-persistent-storage/
+---
+
 # Week 8: Persistent Storage & Volumes
 
 ## The Concept

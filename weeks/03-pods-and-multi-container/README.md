@@ -1,3 +1,8 @@
+---
+title: Week 3 — Pods & Multi-Container Patterns
+permalink: /weeks/03-pods-and-multi-container/
+---
+
 # Week 3: Pods In Depth & Multi-Container Patterns
 
 ## The Concept
