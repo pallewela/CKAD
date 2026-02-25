@@ -1,5 +1,9 @@
 .ignore/*
 
-# Jekyll
+# Jekyll (legacy)
 _site/
 .jekyll-cache/
+
+# Hugo
+public/
+resources/

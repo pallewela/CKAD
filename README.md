@@ -80,23 +80,23 @@ Each week has a folder under `weeks/` with a **README.md** containing:
 
 ---
 
-## GitHub Pages
+## GitHub Pages (Hugo + Docsy)
 
-This repo is set up to build as a **Just the Docs** Jekyll site on GitHub Pages.
+This repo builds as a **Hugo** site using the [Docsy](https://docsy.dev/) theme and deploys to GitHub Pages via GitHub Actions.
 
 1. Push the repo to GitHub.
 2. Go to **Settings → Pages**.
-3. Under **Build and deployment**, choose **GitHub Actions** (recommended) or **Deploy from a branch**:
-   - **Branch:** Select branch (e.g. `main`), folder **/ (root)**, then Save.
-   - GitHub will build with Jekyll and the theme defined in `_config.yml`.
-4. If the site is at `https://<username>.github.io/CKAD/`, set in `_config.yml`:
-   ```yaml
-   baseurl: "/CKAD"
-   ```
-   and update `aux_links` / `gh_edit_repository` with your repo URL.
-5. Optional local preview: `bundle install && bundle exec jekyll serve` then open http://localhost:4000.
+3. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+4. On each push to `main`, the workflow (`.github/workflows/hugo.yml`) runs: it installs Hugo (extended), fetches the Docsy module, builds the site, and deploys it.
 
-You get a docs-style site with sidebar navigation, search, and mobile-friendly pages.
+**Local preview:**
+
+```bash
+hugo mod get    # fetch Docsy and dependencies
+hugo server     # serve at http://localhost:1313
+```
+
+Requires [Hugo (extended)](https://gohugo.io/installation/) v0.155.0 or later and Go (for Hugo modules).
 
 ---
 
