@@ -64,6 +64,8 @@ graph LR
 
 A critical caveat: **NetworkPolicies only work if your cluster has a CNI (Container Network Interface) plugin that supports them.** Calico and Cilium support NetworkPolicy. The default CNI in kind is kindnet, which does not support NetworkPolicy. For testing, you must install Calico or another compatible CNI.
 
+---
+
 ## Beginner Tutorial
 
 ### 1. Install NGINX Ingress Controller
@@ -213,6 +215,7 @@ spec:
 
 From an allowed Pod (with `role=frontend`), connectivity to `role=backend` should work. From a Pod without the label, it should be blocked (when using a compatible CNI).
 
+---
 
 ## Hands-On Lab
 
@@ -230,6 +233,8 @@ Deploy three microservices: `users`, `products`, and `orders`. Create one Ingres
 - The `rewrite-target` annotation may be needed if your apps serve at `/` but you route at `/users`, etc.
 </details>
 
+---
+
 ### Challenge 2: Secure the Database
 
 Create namespace `secure-ns`. Deploy a database Pod (e.g., postgres or a simple TCP echo) and a web Pod. Write a NetworkPolicy: default deny all traffic, then allow only the web Pod to reach the db Pod on port 5432. Verify with a temporary Pod: connectivity from an authorized Pod works; from an unauthorized Pod it is blocked.
@@ -244,6 +249,8 @@ Create namespace `secure-ns`. Deploy a database Pod (e.g., postgres or a simple 
 - Remember to allow DNS egress if Pods need to resolve names.
 - Use `kubectl run` to create a test Pod and `kubectl exec` to run `nc` or `curl` for testing.
 </details>
+
+---
 
 ### Challenge 3: Egress Control
 
@@ -260,6 +267,8 @@ Create a NetworkPolicy that allows Pods in a namespace to connect to DNS (UDP po
 - Use `ipBlock` for external IPs.
 </details>
 
+---
+
 ### Challenge 4: TLS Ingress
 
 Create a self-signed TLS certificate, store it as a Kubernetes Secret of type `kubernetes.io/tls`, and configure an Ingress to use HTTPS with that certificate.
@@ -273,6 +282,8 @@ Create a self-signed TLS certificate, store it as a Kubernetes Secret of type `k
 - Create Secret: `kubectl create secret tls tls-secret --cert=tls.crt --key=tls.key`
 - In Ingress spec, add `tls:` section with `hosts` and `secretName`.
 </details>
+
+---
 
 ## Weekly Speed Drill
 
@@ -288,6 +299,8 @@ Complete these 10 tasks as quickly as possible:
 8. Add an egress rule to allow DNS (UDP port 53) to the kube-system namespace.
 9. Test connectivity with a temporary busybox Pod: `kubectl run test-pod --image=busybox --rm -it --restart=Never -- sh`.
 10. Delete all NetworkPolicies in a namespace.
+
+---
 
 ## Exam Pitfalls
 
@@ -306,6 +319,8 @@ Complete these 10 tasks as quickly as possible:
 - **Writing NetworkPolicy podSelector: {}** applies to ALL Pods in the namespace. Use this for default-deny; use specific labels when you want to target a subset.
 
 - **Forgetting that NetworkPolicy requires a compatible CNI.** Flannel and kindnet do not support NetworkPolicy. Use Calico or Cilium for testing.
+
+---
 
 ## Solution Key
 

@@ -272,7 +272,7 @@ kind delete cluster --name ckad
 
 Four performance-based challenges. Complete each and verify the success criteria.
 
-### Challenge 1: "Explore the Cluster"
+### Challenge 1: Explore the Cluster
 
 **Scenario:** You just joined a team. Inspect the cluster — find how many nodes exist, what version of Kubernetes is running, and list all namespaces. Write your findings to a file `/tmp/cluster-info.txt`.
 
@@ -287,7 +287,9 @@ Four performance-based challenges. Complete each and verify the success criteria
 - Redirect output to the file with `>` or append with `>>`.
 </details>
 
-### Challenge 2: "Create a Pod from Scratch"
+---
+
+### Challenge 2: Create a Pod from Scratch
 
 **Scenario:** Create a Pod named `inspector` running `busybox` with command `sleep 3600`. Exec into it, install `wget`, and fetch the Kubernetes API server's `/version` endpoint from inside the Pod. Hint: the API server is at `https://kubernetes.default.svc`.
 
@@ -302,7 +304,9 @@ Four performance-based challenges. Complete each and verify the success criteria
 - Or use `curl -k` if curl is available.
 </details>
 
-### Challenge 3: "Namespace Isolation"
+---
+
+### Challenge 3: Namespace Isolation
 
 **Scenario:** Create two namespaces `team-a` and `team-b`. Deploy an nginx Pod in each. Verify that `kubectl get pods` (without `-n`) shows nothing (because you're in the default namespace). Then switch to `team-a` and verify you see only that namespace's Pod.
 
@@ -317,7 +321,9 @@ Four performance-based challenges. Complete each and verify the success criteria
 - Switch with `kubectl config set-context --current --namespace=team-a`.
 </details>
 
-### Challenge 4: "Fix a Broken Pod"
+---
+
+### Challenge 4: Fix a Broken Pod
 
 **Scenario:** Apply this broken YAML and fix it. The Pod should end up Running.
 
@@ -400,37 +406,21 @@ kubectl delete namespace drill
 
 Common mistakes that cost points on the CKAD exam:
 
-**1. Forgetting to specify `-n <namespace>`**
+- **Forgetting to specify `-n <namespace>`** — Many tasks require working in a specific namespace. If you omit `-n`, kubectl uses the current context namespace (often `default`). You might create or inspect resources in the wrong place. Always check the task for the target namespace and add `-n <namespace>` to every relevant command.
 
-Many tasks require working in a specific namespace. If you omit `-n`, kubectl uses the current context namespace (often `default`). You might create or inspect resources in the wrong place. Always check the task for the target namespace and add `-n <namespace>` to every relevant command.
+- **Using `kubectl create` vs `kubectl apply`** — `kubectl create` fails if the resource already exists. `kubectl apply` is idempotent: it creates the resource if it does not exist, or updates it if it does. For declarative workflows and re-running commands, prefer `apply -f`. Use `create` only when you explicitly want to fail on duplicates.
 
-**2. Using `kubectl create` vs `kubectl apply`**
+- **Not knowing how to use `kubectl explain`** — During the exam, you cannot browse the web. `kubectl explain` is the built-in documentation. Use `kubectl explain pod`, `kubectl explain pod.spec.containers`, etc., to recall field names and structure. Practice it until it is second nature.
 
-`kubectl create` fails if the resource already exists. `kubectl apply` is idempotent: it creates the resource if it does not exist, or updates it if it does. For declarative workflows and re-running commands, prefer `apply -f`. Use `create` only when you explicitly want to fail on duplicates.
+- **Forgetting labels on Pods** — Services select Pods by labels. If you create a Pod without labels (or with wrong labels), a Service will not find it and traffic will not flow. Always add meaningful labels like `app: myapp` when creating Pods that need to be exposed.
 
-**3. Not knowing how to use `kubectl explain`**
+- **Wrong apiVersion** — Pods use `apiVersion: v1`. Deployments use `apiVersion: apps/v1`. ConfigMaps and Secrets use `v1`. Using the wrong apiVersion causes validation errors. When in doubt, run `kubectl explain <resource>` to see the correct apiVersion.
 
-During the exam, you cannot browse the web. `kubectl explain` is the built-in documentation. Use `kubectl explain pod`, `kubectl explain pod.spec.containers`, etc., to recall field names and structure. Practice it until it is second nature.
+- **Typos in YAML indentation** — YAML is whitespace-sensitive. Use spaces, never tabs. Incorrect indentation leads to "mapping values are not allowed" or "expected key" errors. Align nested keys under their parent. A common mistake is misaligning `containers` under `spec`.
 
-**4. Forgetting labels on Pods**
+- **Not checking events when a Pod won't start** — If a Pod is stuck in Pending, CrashLoopBackOff, or ImagePullBackOff, run `kubectl describe pod <name>`. The Events section at the bottom explains why: scheduling failures, image pull errors, crash reasons. Skipping this wastes time guessing.
 
-Services select Pods by labels. If you create a Pod without labels (or with wrong labels), a Service will not find it and traffic will not flow. Always add meaningful labels like `app: myapp` when creating Pods that need to be exposed.
-
-**5. Wrong apiVersion**
-
-Pods use `apiVersion: v1`. Deployments use `apiVersion: apps/v1`. ConfigMaps and Secrets use `v1`. Using the wrong apiVersion causes validation errors. When in doubt, run `kubectl explain <resource>` to see the correct apiVersion.
-
-**6. Typos in YAML indentation**
-
-YAML is whitespace-sensitive. Use spaces, never tabs. Incorrect indentation leads to "mapping values are not allowed" or "expected key" errors. Align nested keys under their parent. A common mistake is misaligning `containers` under `spec`.
-
-**7. Not checking events when a Pod won't start**
-
-If a Pod is stuck in Pending, CrashLoopBackOff, or ImagePullBackOff, run `kubectl describe pod <name>`. The Events section at the bottom explains why: scheduling failures, image pull errors, crash reasons. Skipping this wastes time guessing.
-
-**8. Forgetting `--restart=Never` when creating a one-off Pod with `kubectl run`**
-
-By default, `kubectl run` creates a Deployment (which creates ReplicaSets and Pods). For a single, one-off Pod, you must add `--restart=Never`. Otherwise you get a Deployment when the task asks for a Pod.
+- **Forgetting `--restart=Never` when creating a one-off Pod with `kubectl run`** — By default, `kubectl run` creates a Deployment (which creates ReplicaSets and Pods). For a single, one-off Pod, you must add `--restart=Never`. Otherwise you get a Deployment when the task asks for a Pod.
 
 ---
 

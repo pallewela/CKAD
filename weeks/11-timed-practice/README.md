@@ -96,7 +96,7 @@ Use `kubectl explain pod.spec.containers` and `kubectl explain deployment.spec.t
 
 ## Hands-On Lab
 
-### Challenge 1: "Multi-Object Deploy" (6 min)
+### Challenge 1: Multi-Object Deploy (6 min)
 
 Create namespace `exam-1`. In it: Deployment `api` (image nginx, 3 replicas), ClusterIP Service on port 80, ConfigMap `api-config` with key `LOG_LEVEL=debug` injected as env var.
 
@@ -110,7 +110,7 @@ Create namespace `exam-1`. In it: Deployment `api` (image nginx, 3 replicas), Cl
 - Create ConfigMap with `k create configmap api-config --from-literal=LOG_LEVEL=debug -n exam-1`, then edit the Deployment to add `envFrom` or `env` referencing the ConfigMap.
 </details>
 
-### Challenge 2: "Troubleshooting" (6 min)
+### Challenge 2: Troubleshooting (6 min)
 
 A Pod named `broken-app` is in CrashLoopBackOff. Find and fix all issues. (Provide a broken YAML with: wrong image name, bad command, missing volume mount for a required ConfigMap.)
 
@@ -124,7 +124,7 @@ A Pod named `broken-app` is in CrashLoopBackOff. Find and fix all issues. (Provi
 - Fix by editing the manifest and reapplying, or by deleting and recreating.
 </details>
 
-### Challenge 3: "Network Security" (6 min)
+### Challenge 3: Network Security (6 min)
 
 In namespace `restricted`, create a default-deny NetworkPolicy. Then allow Pods with label `role=api` to receive traffic on port 8080 from Pods with label `role=frontend` only.
 
@@ -138,7 +138,7 @@ In namespace `restricted`, create a default-deny NetworkPolicy. Then allow Pods 
 - NetworkPolicy has no imperative create command; use `--dry-run=client -o yaml` from a placeholder or write minimal YAML.
 </details>
 
-### Challenge 4: "Probes and Rollout" (6 min)
+### Challenge 4: Probes and Rollout (6 min)
 
 Create a Deployment `webapp` with nginx, add a liveness probe (HTTP GET / every 10s), and a readiness probe (HTTP GET / every 5s). Perform a rolling update to nginx:alpine. Verify zero-downtime with `kubectl rollout status`.
 
@@ -153,7 +153,7 @@ Create a Deployment `webapp` with nginx, add a liveness probe (HTTP GET / every 
 - Update: `k set image deployment/webapp nginx=nginx:alpine` then `k rollout status deployment/webapp`.
 </details>
 
-### Challenge 5: "Helm and RBAC" (8 min)
+### Challenge 5: Helm and RBAC (8 min)
 
 Install any nginx Helm chart with 2 replicas. Create a ServiceAccount `viewer`. Create a Role granting get/list on pods and services. Bind it to the ServiceAccount. Verify with `kubectl auth can-i`.
 

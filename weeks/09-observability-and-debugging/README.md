@@ -490,7 +490,7 @@ Events show scheduling decisions, probe failures, and resource errors across the
 
 ## Hands-On Lab
 
-### Challenge 1: "Probe Configuration"
+### Challenge 1: Probe Configuration
 
 **Scenario:** Deploy a Go app (or nginx with custom endpoints) with all three probes: startup, liveness, and readiness. The startup probe should allow 30 seconds for initialization. The liveness probe should check `/healthz` every 10 seconds. The readiness probe should check `/ready` every 5 seconds. Verify all three are working via `kubectl describe`.
 
@@ -509,7 +509,7 @@ Events show scheduling decisions, probe failures, and resource errors across the
 
 ---
 
-### Challenge 2: "Fix CrashLoopBackOff"
+### Challenge 2: Fix CrashLoopBackOff
 
 **Scenario:** Apply the pre-built broken deployment below. The student must use ONLY kubectl commands to diagnose and fix ALL issues without being told what they are.
 
@@ -563,7 +563,7 @@ Three issues to find and fix: (1) wrong command that crashes immediately, (2) mi
 
 ---
 
-### Challenge 3: "Readiness Gate"
+### Challenge 3: Readiness Gate
 
 **Scenario:** Deploy an application with a readiness probe. Create a Service pointing to it. Demonstrate that when the readiness probe fails, the Pod IP is removed from the Endpoints list. Fix the readiness probe and verify the Pod IP returns to Endpoints.
 
@@ -583,7 +583,7 @@ Three issues to find and fix: (1) wrong command that crashes immediately, (2) mi
 
 ---
 
-### Challenge 4: "Log Investigation"
+### Challenge 4: Log Investigation
 
 **Scenario:** Deploy a multi-container Pod with two containers: `logger` (writes structured logs and runs indefinitely) and `crasher` (crashes intermittently after printing an error message). Using only kubectl, find which container is crashing, get the crash logs using `--previous`, determine the root cause from the logs, and fix the issue.
 
@@ -602,7 +602,7 @@ Three issues to find and fix: (1) wrong command that crashes immediately, (2) mi
 
 ---
 
-### Challenge 5: "Resource Monitoring"
+### Challenge 5: Resource Monitoring
 
 **Scenario:** Install metrics-server (if not already installed). Deploy a Pod that consumes high CPU (e.g., a tight loop). Use `kubectl top` to identify the resource hog. Set appropriate resource limits to constrain it.
 

@@ -312,11 +312,16 @@ Five performance-based challenges. Complete each and verify the success criteria
 
 **Success criteria:** Pod is Init:0/1 until `mydb` Service exists. After creating the Service, Pod becomes Running.
 
-Hints
+<details>
+<summary>Hints</summary>
 
 - Use an init container with `command: ["sh", "-c", "until nslookup mydb; do sleep 2; done"]`.
 - The Service can be a simple ClusterIP with no selector (headless) or with a selector pointing to any Pod.
 - Create the Pod first, observe Init state. Then create the Service in the same namespace.
+
+</details>
+
+---
 
 ### Challenge 2: Sidecar Log Shipper
 
@@ -324,12 +329,17 @@ Hints
 
 **Success criteria:** Main container writes to the shared file. `kubectl logs <pod> -c sidecar` shows the tailed content.
 
-Hints
+<details>
+<summary>Hints</summary>
 
 - Use an emptyDir volume mounted at `/var/log` in both containers.
 - Main: `while true; do echo "$(date) log line" >> /var/log/app.log; sleep 3; done`
 - Sidecar: `tail -f /var/log/app.log`
 - Use `-c sidecar` to get logs from the sidecar container.
+
+</details>
+
+---
 
 ### Challenge 3: Fix a CrashLoopBackOff
 
@@ -337,11 +347,16 @@ Hints
 
 **Success criteria:** Pod status is Running. No restarts after the fix.
 
-Hints
+<details>
+<summary>Hints</summary>
 
 - Use `kubectl describe pod broken` to see events and last state.
 - Use `kubectl logs broken --previous` to see logs from the crashed container.
 - Common causes: wrong image name, command that exits immediately, missing required env vars.
+
+</details>
+
+---
 
 ### Challenge 4: Resource Limits
 
@@ -349,11 +364,16 @@ Hints
 
 **Success criteria:** First run: Pod is OOMKilled. After fix: Pod runs without OOMKilled.
 
-Hints
+<details>
+<summary>Hints</summary>
 
 - Use `resources.requests.memory: "64Mi"` and `resources.limits.memory: "128Mi"`.
 - To exceed: use a script that allocates memory (e.g., `dd` or a loop that grows a variable).
 - Fix: either increase the limit to 256Mi or change the app to use less memory.
+
+</details>
+
+---
 
 ### Challenge 5: Adapter Pattern
 
@@ -361,11 +381,14 @@ Hints
 
 **Success criteria:** Main container produces custom format. Adapter outputs valid JSON to stdout. `kubectl logs <pod> -c adapter` shows JSON lines.
 
-Hints
+<details>
+<summary>Hints</summary>
 
 - Main writes to a shared file (emptyDir). Adapter reads and transforms.
 - Use `awk` or `sed` in the adapter to parse and reformat, or a simple script.
 - Example: `echo "INFO: request received" >> /shared/app.log` (main); adapter tails and transforms.
+
+</details>
 
 ---
 
@@ -429,37 +452,21 @@ kubectl get pods --sort-by=.metadata.creationTimestamp
 
 Common mistakes that cost points on the CKAD exam:
 
-**1. Forgetting `-c <name>` for multi-container Pods**
+- **Forgetting `-c <name>` for multi-container Pods** — When a Pod has multiple containers, `kubectl logs` and `kubectl exec` default to the first container. You must specify `-c <container-name>` to target a specific container. Without it, you may view or exec into the wrong one.
 
-When a Pod has multiple containers, `kubectl logs` and `kubectl exec` default to the first container. You must specify `-c <container-name>` to target a specific container. Without it, you may view or exec into the wrong one.
+- **Init container ordering** — Init containers run sequentially. Each must complete before the next starts. If you need init container B to run after A, list them in order under `initContainers`. Do not assume parallel execution.
 
-**2. Init container ordering**
+- **Wrong restartPolicy for Jobs** — Jobs use Pods with `restartPolicy: OnFailure` or `Never`. Using `Always` for a Job's Pod template is invalid; Jobs require that the Pod does not restart indefinitely on success.
 
-Init containers run sequentially. Each must complete before the next starts. If you need init container B to run after A, list them in order under `initContainers`. Do not assume parallel execution.
+- **Confusing emptyDir with PersistentVolume** — **emptyDir** is ephemeral: it is created when the Pod starts and deleted when the Pod is removed. Data does not persist across Pod restarts. A **PersistentVolume** (PV) is for long-term storage. Use emptyDir for temporary sharing between containers in the same Pod.
 
-**3. Wrong restartPolicy for Jobs**
+- **Memory limits too low (OOMKilled)** — If you set a memory limit below what the application needs, the container will be OOMKilled repeatedly. Check `kubectl describe pod` for the OOMKilled reason. Increase the limit or reduce memory usage.
 
-Jobs use Pods with `restartPolicy: OnFailure` or `Never`. Using `Always` for a Job's Pod template is invalid; Jobs require that the Pod does not restart indefinitely on success.
+- **Not knowing containers share localhost** — Containers in a Pod share the same network namespace. They can reach each other via `localhost`. If the main container listens on port 8080, a sidecar can connect to `localhost:8080`. Do not use the Pod IP for inter-container communication within the same Pod.
 
-**4. Confusing emptyDir with PersistentVolume**
+- **Init container must succeed first** — If any init container fails, the main containers never start. The Pod stays in Init state. Ensure init container commands exit with 0 on success. Use `until` loops or retry logic for dependency checks.
 
-**emptyDir** is ephemeral: it is created when the Pod starts and deleted when the Pod is removed. Data does not persist across Pod restarts. A **PersistentVolume** (PV) is for long-term storage. Use emptyDir for temporary sharing between containers in the same Pod.
-
-**5. Memory limits too low (OOMKilled)**
-
-If you set a memory limit below what the application needs, the container will be OOMKilled repeatedly. Check `kubectl describe pod` for the OOMKilled reason. Increase the limit or reduce memory usage.
-
-**6. Not knowing containers share localhost**
-
-Containers in a Pod share the same network namespace. They can reach each other via `localhost`. If the main container listens on port 8080, a sidecar can connect to `localhost:8080`. Do not use the Pod IP for inter-container communication within the same Pod.
-
-**7. Init container must succeed first**
-
-If any init container fails, the main containers never start. The Pod stays in Init state. Ensure init container commands exit with 0 on success. Use `until` loops or retry logic for dependency checks.
-
-**8. initContainers indentation level**
-
-`initContainers` is a sibling of `containers`, not a child. Both live under `spec`:
+- **initContainers indentation level** — `initContainers` is a sibling of `containers`, not a child. Both live under `spec`:
 
 ```yaml
 spec:

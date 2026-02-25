@@ -474,7 +474,7 @@ You should see an event like: `Error creating: pods "quota-test-3" is forbidden:
 
 ## Hands-On Lab
 
-### Challenge 1: "Configure a Database"
+### Challenge 1: Configure a Database
 
 **Scenario:** Deploy a PostgreSQL Pod. Inject `POSTGRES_DB` via a ConfigMap environment variable and `POSTGRES_PASSWORD` via a Secret environment variable. Exec into the Pod and verify with `psql -U postgres -d <dbname>`.
 
@@ -543,7 +543,7 @@ You should see an event like: `Error creating: pods "quota-test-3" is forbidden:
 
 ---
 
-### Challenge 5: "ServiceAccount Permissions"
+### Challenge 5: ServiceAccount Permissions
 
 **Scenario:** Create a ServiceAccount called `pod-reader`. Create a Role that allows only `get`, `list`, `watch` on pods. Bind the role to the ServiceAccount. Create a Pod using that ServiceAccount and verify it can list pods but cannot delete them.
 

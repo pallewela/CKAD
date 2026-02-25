@@ -205,6 +205,8 @@ kubectl delete cronjob every-minute
 - Use `kubectl rollout undo` after the broken image fails
 </details>
 
+---
+
 ### Challenge 2: Batch Processing
 
 **Scenario:** Create a Job with `completions=5` and `parallelism=2` that processes items. Verify all 5 complete successfully.
@@ -218,6 +220,8 @@ kubectl delete cronjob every-minute
 - Use `restartPolicy: Never` or `OnFailure`
 - Check `kubectl get jobs` and `kubectl get pods` to verify completion count
 </details>
+
+---
 
 ### Challenge 3: Scheduled Task
 
@@ -233,6 +237,8 @@ kubectl delete cronjob every-minute
 - Add `successfulJobsHistoryLimit: 3` to the CronJob spec
 - Wait 4+ minutes and check `kubectl get jobs` for spawned Jobs
 </details>
+
+---
 
 ### Challenge 4: Deployment Strategy
 
@@ -313,6 +319,8 @@ kubectl rollout undo deployment/nginx-deploy
 kubectl rollout status deployment/nginx-deploy
 ```
 
+---
+
 ### Challenge 2: Batch Processing
 
 ```yaml
@@ -339,6 +347,8 @@ kubectl get jobs
 kubectl get pods
 # Wait for COMPLETIONS to show 5/5
 ```
+
+---
 
 ### Challenge 3: Scheduled Task
 
@@ -368,6 +378,8 @@ kubectl get cronjobs
 kubectl get jobs
 kubectl logs job/<job-name-from-cronjob>
 ```
+
+---
 
 ### Challenge 4: Deployment Strategy
 

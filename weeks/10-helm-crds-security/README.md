@@ -194,7 +194,7 @@ helm template my-nginx bitnami/nginx --set replicaCount=2
 helm uninstall my-nginx
 ```
 
-### 11. Kustomize basics
+### 11. Kustomize base and staging overlay
 
 Create a base directory with a Deployment YAML and kustomization.yaml, create a staging overlay that changes replica count.
 
@@ -249,7 +249,7 @@ commonLabels:
   env: staging
 ```
 
-### 12. Apply with Kustomize
+### 12. Apply with kubectl apply -k
 
 Apply with `kubectl apply -k overlays/staging/`:
 
@@ -357,7 +357,7 @@ Apply the Role and RoleBinding:
 kubectl apply -f rbac-pod-reader.yaml
 ```
 
-### 16. Test RBAC permissions
+### 16. Test RBAC with kubectl auth can-i
 
 Test with `kubectl auth can-i`:
 
@@ -373,7 +373,7 @@ kubectl auth can-i delete pods --as=system:serviceaccount:default:mysa
 
 Expected output: `no`
 
-### 17. SecurityContext: Non-root Pod
+### 17. Create a Pod with SecurityContext
 
 Create a Pod that cannot run as root:
 

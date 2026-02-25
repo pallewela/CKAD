@@ -133,7 +133,7 @@ graph TD
   NS --> PVC[19. PVC]
 ```
 
-4. **Review your weak spots based on the speed run**
+### 4. Review your weak spots based on the speed run
 
 ## Hands-On Lab
 
@@ -248,14 +248,14 @@ Final comprehensive drill — 15 minutes, 15 tasks. These are the most commonly 
 
 ## Exam Pitfalls
 
-- Not doing a warm-up before the exam (set up aliases first thing)
-- Spending too long on one question (skip at 6-8 min mark)
-- Forgetting to switch cluster context (answers in wrong cluster score 0)
-- Not using `kubectl explain` (faster than searching kubernetes.io)
-- Writing YAML from memory instead of using `--dry-run=client -o yaml`
-- Not verifying your answer (always `kubectl get` after applying)
-- Panicking when you see an unfamiliar topic (partial credit exists)
-- Not reading the FULL question (namespace, context, specific requirements)
+- **Not doing a warm-up before the exam** — Set up aliases first thing.
+- **Spending too long on one question** — Skip at the 6-8 minute mark.
+- **Forgetting to switch cluster context** — Answers in wrong cluster score 0.
+- **Not using `kubectl explain`** — Faster than searching kubernetes.io.
+- **Writing YAML from memory instead of using `--dry-run=client -o yaml`** — Use imperative commands with `--dry-run=client -o yaml` instead.
+- **Not verifying your answer** — Always `kubectl get` after applying.
+- **Panicking when you see an unfamiliar topic** — Partial credit exists.
+- **Not reading the FULL question** — Check namespace, context, and specific requirements.
 
 ## Solution Key
 

@@ -267,9 +267,9 @@ docker push YOUR_USERNAME/myapp:v1
 
 Complete these four challenges. Each has clear success criteria and optional hints.
 
-### Build and Optimize
+### Challenge 1: Build and Optimize
 
-You are given a Go web app that returns `{"message":"hello"}` on port 8080. The current Dockerfile uses `FROM golang:1.21` and produces an image over 800MB. Your task is to reduce the final image size to under 20MB using a multi-stage build. The app must still respond correctly to `curl http://localhost:8080`.
+**Scenario:** You are given a Go web app that returns `{"message":"hello"}` on port 8080. The current Dockerfile uses `FROM golang:1.21` and produces an image over 800MB. Your task is to reduce the final image size to under 20MB using a multi-stage build. The app must still respond correctly to `curl http://localhost:8080`.
 
 **Success criteria:** `docker images` shows your image under 20MB, and `curl http://localhost:8080` returns valid JSON.
 
@@ -282,9 +282,11 @@ You are given a Go web app that returns `{"message":"hello"}` on port 8080. The 
 - Ensure the final stage has `EXPOSE 8080` and the correct `ENTRYPOINT` or `CMD`.
 </details>
 
-### Debug a Broken Build
+---
 
-A Dockerfile is provided that fails to build or run. It has three deliberate mistakes:
+### Challenge 2: Debug a Broken Build
+
+**Scenario:** A Dockerfile is provided that fails to build or run. It has three deliberate mistakes:
 
 1. Wrong `WORKDIR` (path does not match where files are copied).
 2. Missing `COPY` (source code is never copied into the image).
@@ -302,9 +304,11 @@ Fix all three so the image builds and the container runs successfully.
 - Check that `ENTRYPOINT` or `CMD` references the actual binary path produced by `go build`.
 </details>
 
-### Environment Variables
+---
 
-Modify the Go app so it reads the port from an environment variable `APP_PORT` (default 8080 if unset). Then run the container with `docker run -e APP_PORT=3000 -p 3000:3000 myapp` and verify the app listens on port 3000.
+### Challenge 3: Environment Variables
+
+**Scenario:** Modify the Go app so it reads the port from an environment variable `APP_PORT` (default 8080 if unset). Then run the container with `docker run -e APP_PORT=3000 -p 3000:3000 myapp` and verify the app listens on port 3000.
 
 **Success criteria:** The app listens on the port specified by `APP_PORT`, and `curl` to that port returns the expected response.
 
@@ -316,9 +320,11 @@ Modify the Go app so it reads the port from an environment variable `APP_PORT` (
 - Remember to map the correct host port with `-p` when running.
 </details>
 
-### Layer Caching Optimization
+---
 
-A Dockerfile copies all source code first, then runs `go mod download` and `go build`. This invalidates the cache on every code change. Reorder the Dockerfile so that:
+### Challenge 4: Layer Caching Optimization
+
+**Scenario:** A Dockerfile copies all source code first, then runs `go mod download` and `go build`. This invalidates the cache on every code change. Reorder the Dockerfile so that:
 
 1. `go.mod` and `go.sum` are copied first.
 2. `go mod download` runs next.
@@ -413,37 +419,21 @@ compdef __start_kubectl k
 
 Avoid these common mistakes when working with Docker and containers.
 
-**1. Forgetting to expose ports**
+- **Forgetting to expose ports** — `EXPOSE` in a Dockerfile only documents the port; it does not publish it. You must use `-p` (or `-P`) with `docker run` to map the port to the host. Without `-p`, the app listens inside the container but is unreachable from outside.
 
-`EXPOSE` in a Dockerfile only documents the port; it does not publish it. You must use `-p` (or `-P`) with `docker run` to map the port to the host. Without `-p`, the app listens inside the container but is unreachable from outside.
+- **Using CMD when ENTRYPOINT is needed (and vice versa)** — `CMD` is easily overridden by arguments to `docker run`. If you need a fixed executable (e.g., your binary) that should not be overridden, use `ENTRYPOINT`. Use `CMD` for default arguments. For a single binary, `ENTRYPOINT ["/server"]` is often correct; `CMD ["./server"]` can be accidentally replaced.
 
-**2. Using CMD when ENTRYPOINT is needed (and vice versa)**
+- **Not using .dockerignore** — Without a `.dockerignore`, the build context includes everything in the directory: `.git`, `node_modules`, build artifacts, etc. This bloats the context, slows builds, and can leak secrets. Add a `.dockerignore` with entries like `*.md`, `.git`, `vendor`, and any large or sensitive paths.
 
-`CMD` is easily overridden by arguments to `docker run`. If you need a fixed executable (e.g., your binary) that should not be overridden, use `ENTRYPOINT`. Use `CMD` for default arguments. For a single binary, `ENTRYPOINT ["/server"]` is often correct; `CMD ["./server"]` can be accidentally replaced.
+- **Building with CGO enabled** — Go binaries are often built with CGO (C bindings) by default on some systems. A CGO binary may depend on glibc and will not run in `scratch` or minimal Alpine. Always use `CGO_ENABLED=0` when building for containers if you plan to use `scratch` or a minimal base.
 
-**3. Not using .dockerignore**
+- **Confusing image tags** — `latest` is a tag, not "the newest version." It can point to any image the author last pushed. In production, use explicit version tags (e.g., `myapp:v1.2.3`). Avoid relying on `latest` for reproducibility.
 
-Without a `.dockerignore`, the build context includes everything in the directory: `.git`, `node_modules`, build artifacts, etc. This bloats the context, slows builds, and can leak secrets. Add a `.dockerignore` with entries like `*.md`, `.git`, `vendor`, and any large or sensitive paths.
+- **Forgetting GOOS=linux when cross-compiling** — If you build on macOS or Windows, the default target is your host OS. Containers usually run Linux. Use `GOOS=linux GOARCH=amd64 go build` (or `arm64` for ARM) so the binary runs correctly in a Linux container.
 
-**4. Building with CGO enabled**
+- **Running as root when not necessary** — Containers often run as root by default. This increases risk if the container is compromised. Use a non-root user when possible: add `USER nobody` or create a dedicated user in the Dockerfile, and ensure file permissions allow that user to run the app.
 
-Go binaries are often built with CGO (C bindings) by default on some systems. A CGO binary may depend on glibc and will not run in `scratch` or minimal Alpine. Always use `CGO_ENABLED=0` when building for containers if you plan to use `scratch` or a minimal base.
-
-**5. Confusing image tags**
-
-`latest` is a tag, not "the newest version." It can point to any image the author last pushed. In production, use explicit version tags (e.g., `myapp:v1.2.3`). Avoid relying on `latest` for reproducibility.
-
-**6. Forgetting GOOS=linux when cross-compiling**
-
-If you build on macOS or Windows, the default target is your host OS. Containers usually run Linux. Use `GOOS=linux GOARCH=amd64 go build` (or `arm64` for ARM) so the binary runs correctly in a Linux container.
-
-**7. Running as root when not necessary**
-
-Containers often run as root by default. This increases risk if the container is compromised. Use a non-root user when possible: add `USER nobody` or create a dedicated user in the Dockerfile, and ensure file permissions allow that user to run the app.
-
-**8. Wrong WORKDIR or COPY paths**
-
-If `WORKDIR` is `/app` but you `COPY . .` and the build expects files in a different location, or if `ENTRYPOINT` points to `/server` but the binary is at `/app/server`, the container will fail. Double-check that paths are consistent across `WORKDIR`, `COPY`, `RUN`, and `ENTRYPOINT`/`CMD`.
+- **Wrong WORKDIR or COPY paths** — If `WORKDIR` is `/app` but you `COPY . .` and the build expects files in a different location, or if `ENTRYPOINT` points to `/server` but the binary is at `/app/server`, the container will fail. Double-check that paths are consistent across `WORKDIR`, `COPY`, `RUN`, and `ENTRYPOINT`/`CMD`.
 
 ---
 

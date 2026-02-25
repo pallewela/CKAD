@@ -77,6 +77,8 @@ graph TD
   PVC2 --> PV2[PV auto-provisioned]
 ```
 
+---
+
 ## Beginner Tutorial
 
 ### 1. Pod with emptyDir shared between two containers
@@ -298,6 +300,8 @@ kubectl get pods
 # mysql-0, mysql-1
 ```
 
+---
+
 ## Hands-On Lab
 
 ### Challenge 1: Data Persistence
@@ -386,6 +390,8 @@ kubectl get pods
 9. Delete a PVC and observe PV status (Released vs Available)
 10. Create a PVC with a specific StorageClass
 
+---
+
 ## Exam Pitfalls
 
 - **PVC accessModes must match PV accessModes** — The PVC can request a subset (e.g., RWO when PV supports RWO and RWX), but not a superset. Mismatch prevents binding.
@@ -403,6 +409,8 @@ kubectl get pods
 - **StatefulSet volumeClaimTemplates** — PVCs created by volumeClaimTemplates are NOT deleted when the StatefulSet is scaled down. They persist. Scale down does not remove PVCs.
 
 - **PV reclaim policy "Delete"** — When the PVC is deleted, the provisioner destroys the backing storage. Data is lost. Use Retain if you need to keep data.
+
+---
 
 ## Solution Key
 
