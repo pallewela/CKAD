@@ -1,6 +1,8 @@
 ---
 title: Week 5 — Deployments, Jobs & CronJobs
 permalink: /weeks/05-deployments-jobs-cronjobs/
+parent: "Phase 2 — Core Objects"
+nav_order: 2
 ---
 
 # Week 5: Deployments, Jobs & CronJobs

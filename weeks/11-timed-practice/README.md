@@ -1,6 +1,8 @@
 ---
 title: Week 11 — Timed Practice & Weak-Spot Drills
 permalink: /weeks/11-timed-practice/
+parent: "Phase 4 — Exam Readiness"
+nav_order: 1
 ---
 
 # Week 11: Timed Practice & Weak-Spot Drills

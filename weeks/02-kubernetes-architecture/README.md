@@ -1,6 +1,8 @@
 ---
 title: Week 2 — Kubernetes Architecture & Core Concepts
 permalink: /weeks/02-kubernetes-architecture/
+parent: "Phase 1 — Foundations"
+nav_order: 2
 ---
 
 # Week 2: Kubernetes Architecture & Core Concepts

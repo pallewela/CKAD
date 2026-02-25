@@ -1,6 +1,8 @@
 ---
 title: Week 9 — Observability, Probes & Debugging
 permalink: /weeks/09-observability-and-debugging/
+parent: "Phase 3 — Advanced & Security"
+nav_order: 2
 ---
 
 # Week 9: Observability, Probes & Debugging

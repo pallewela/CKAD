@@ -1,6 +1,8 @@
 ---
 title: Week 4 — ConfigMaps, Secrets & SecurityContext
 permalink: /weeks/04-configmaps-secrets-security/
+parent: "Phase 2 — Core Objects"
+nav_order: 1
 ---
 
 # Week 4: Configuration — ConfigMaps, Secrets & SecurityContext

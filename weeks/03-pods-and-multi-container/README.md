@@ -1,7 +1,9 @@
 ---
-
-## title: Week 3 — Pods & Multi-Container Patterns
+title: Week 3 — Pods & Multi-Container Patterns
 permalink: /weeks/03-pods-and-multi-container/
+parent: "Phase 1 — Foundations"
+nav_order: 3
+---
 
 # Week 3: Pods In Depth & Multi-Container Patterns
 

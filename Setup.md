@@ -1,6 +1,7 @@
 ---
 title: Setup
 permalink: /setup/
+nav_order: 3
 ---
 
 # Local Cluster Setup Guide

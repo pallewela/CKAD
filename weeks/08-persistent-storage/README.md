@@ -1,6 +1,8 @@
 ---
 title: Week 8 — Persistent Storage & Volumes
 permalink: /weeks/08-persistent-storage/
+parent: "Phase 3 — Advanced & Security"
+nav_order: 1
 ---
 
 # Week 8: Persistent Storage & Volumes

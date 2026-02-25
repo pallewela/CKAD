@@ -1,6 +1,8 @@
 ---
 title: Week 1 — Containers & Docker Fundamentals
 permalink: /weeks/01-containers-and-docker/
+parent: "Phase 1 — Foundations"
+nav_order: 1
 ---
 
 # Week 1: Containers & Docker Fundamentals

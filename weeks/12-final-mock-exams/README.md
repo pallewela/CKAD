@@ -1,6 +1,8 @@
 ---
 title: Week 12 — Final Mock Exams & Exam Day Preparation
 permalink: /weeks/12-final-mock-exams/
+parent: "Phase 4 — Exam Readiness"
+nav_order: 2
 ---
 
 # Week 12: Final Mock Exams & Exam Day Preparation

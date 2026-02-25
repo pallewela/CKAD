@@ -1,6 +1,8 @@
 ---
 title: Week 10 — Helm, CRDs & Security Deep Dive
 permalink: /weeks/10-helm-crds-security/
+parent: "Phase 3 — Advanced & Security"
+nav_order: 3
 ---
 
 # Week 10: Helm, Custom Resources & Security Deep Dive

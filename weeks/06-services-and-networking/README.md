@@ -1,6 +1,8 @@
 ---
 title: Week 6 — Services & Networking
 permalink: /weeks/06-services-and-networking/
+parent: "Phase 2 — Core Objects"
+nav_order: 3
 ---
 
 # Week 6: Services & Networking

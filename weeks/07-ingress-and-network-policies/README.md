@@ -1,6 +1,8 @@
 ---
 title: Week 7 — Ingress & Network Policies
 permalink: /weeks/07-ingress-and-network-policies/
+parent: "Phase 2 — Core Objects"
+nav_order: 4
 ---
 
 # Week 7: Ingress & Network Policies

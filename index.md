@@ -2,6 +2,7 @@
 title: Home
 layout: default
 permalink: /
+nav_order: 1
 ---
 
 # CKAD 12-Week Study Plan

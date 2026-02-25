@@ -1,6 +1,7 @@
 ---
 title: Syllabus
 permalink: /syllabus/
+nav_order: 2
 ---
 
 # CKAD 12-Week Study Syllabus
